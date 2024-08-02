@@ -7,11 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,8 +23,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.room.Room
+import com.example.aisplitwise.dashboard.DashboardViewModel
 import com.example.aisplitwise.ui.theme.AISplitwiseTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -31,33 +39,31 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            NavHost(navController = navController, startDestination = FriendsList) {
-                composable<Profile> {
-                    val args = it.toRoute<Profile>()
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Cyan)
-                    ) {
-                        Text(text = args.name, Modifier.align(Alignment.Center))
-                    }
+
+            val db = Room.databaseBuilder(
+                applicationContext,
+                AppDatabase::class.java, "database-name"
+            ).build()
+            val userDao=db.userDao()
+            var users: List<User> = emptyList()
+            val rand=Random.Default
+            LaunchedEffect(key1 = Unit) {
+                withContext(Dispatchers.IO) {
+                    users= userDao.getAll()
+
+                    delay(1000)
+                    userDao.insertAll(
+                        User(
+                            uid = rand.nextInt(),
+                            firstName = "Atharva",
+                            lastName = "Gorule"
+                        )
+                    )
                 }
-                composable<FriendsList> {
-                    val dashBoardViewModel= hiltViewModel<DashboardViewModel>()
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Red)
-                    ) {
-                        Text(
-                            text = "Hello",
-                            Modifier
-                                .align(Alignment.Center)
-                                .clickable { navController.navigate(Profile(name = "Atharv")) })
-                    }
-                }
-                // Add more destinations similarly.
+
             }
+
+            NavHostInitializer(navController)
 
         }
     }
