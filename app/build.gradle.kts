@@ -4,6 +4,9 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.hilt)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+
 
 }
 
@@ -80,6 +83,7 @@ dependencies {
     // Hilt Libraries
     implementation(libs.hilt.android)
     implementation(libs.hilt.android.gradle)
+    implementation(libs.firebase.firestore.ktx)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.androidx.navigation.compose)
 
@@ -100,4 +104,19 @@ dependencies {
     // Debugging Libraries
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    implementation("com.google.firebase:firebase-crashlytics")
+
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("io.coil-kt:coil:2.7.0")
+
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
+//    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+
 }
