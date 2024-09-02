@@ -2,6 +2,11 @@ package com.example.aisplitwise
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +27,22 @@ object DatabaseModule {
             "Spliwise.db"
         ).build()
     }
+
+    @Singleton
+    @Provides
+    fun provideFireStore(): FirebaseFirestore {
+        return  Firebase.firestore
+    }
+
+    @Singleton
+    @Provides
+    fun provideFireBaseAuth(): FirebaseAuth {
+        return   Firebase.auth
+    }
+
+
+
+
 
     @Provides
     fun provideTaskDao(database: AppDatabase): UserDao = database.userDao()
