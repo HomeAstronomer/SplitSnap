@@ -3,7 +3,10 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.hilt)
-    alias(libs.plugins.jetbrains.kotlin.serialisation)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    id ("kotlin-parcelize")
 
 }
 
@@ -58,27 +61,70 @@ android {
 
 dependencies {
 
+    // Core Libraries
     implementation(libs.androidx.core.ktx)
+
+    // KotlinX Serialization
     implementation(libs.kotlix.serialization.json)
     implementation(libs.kotlix.serialization.core)
+
+    // Lifecycle and Compose Libraries
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+
+    // Navigation and Material
     implementation(libs.androidx.material3)
     implementation(libs.navigation.compose)
+
+    // Hilt Libraries
     implementation(libs.hilt.android)
     implementation(libs.hilt.android.gradle)
+    implementation(libs.firebase.firestore.ktx)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.androidx.navigation.compose)
-//    implementation(libs.hilt.androidx)
+
+    //Room Libraries
+    implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+
+    // Testing Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    // Debugging Libraries
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(platform(libs.firebase.bom))
+
+    // Use the Firebase bundle
+    implementation(libs.bundles.firebase)
+
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+
+
+    implementation(libs.androidx.material.icons.extended)
+
+    implementation(libs.androidx.material.icons.extended)
+
+    implementation(libs.lottie.compose)
+
+    implementation(libs.gson)
+
+
+
+//    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+
 }
