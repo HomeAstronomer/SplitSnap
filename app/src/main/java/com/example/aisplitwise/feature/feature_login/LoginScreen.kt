@@ -1,14 +1,18 @@
 package com.example.aisplitwise.feature.feature_login
 
 import android.widget.Toast
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,22 +28,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.aisplitwise.DashBoardRoute
+import com.example.aisplitwise.SignUpScreenRoute
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController) {
-
+Scaffold(modifier=Modifier.imePadding()) {padding->
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
-        val context= LocalContext.current
-   var email by remember {
-       mutableStateOf("")
-   }
+    val context = LocalContext.current
+    var email by remember {
+        mutableStateOf("")
+    }
 
     var password by remember {
         mutableStateOf("")
     }
-
+    val scrollState= rememberScrollState()
     Column(
         modifier = Modifier
+            .padding(padding)
+            .scrollable(state=scrollState,
+                orientation = Orientation.Vertical)
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
@@ -47,8 +58,8 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
     ) {
         Text(
             text = "Sign In",
-            style =  MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 32.dp),
         )
 
         OutlinedTextField(
@@ -71,24 +82,28 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
         )
 
         Button(
-            onClick = {loginViewModel.emailLogin(email,password,{fireBaseUser->
-                navController.navigate(DashBoardRoute(displayName = fireBaseUser?.displayName,
-                    email = fireBaseUser?.email,
-                    phoneNumber = fireBaseUser?.phoneNumber,
-                    photoUrl = fireBaseUser?.photoUrl?.path))
+            onClick = {
+                loginViewModel.signIn(email, password) { dashboardRoute ->
+                    navController.navigate(dashboardRoute)
+                }
             },
-                {error->
-                    Toast.makeText(
-                        context,
-                        error?:"Authentication failed.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
         ) {
             Text(text = "Sign In with Email")
+        }
+
+
+        Button(
+            onClick = {
+                navController.navigate(SignUpScreenRoute)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Text(text = "Sign Up with Email")
         }
 
         Divider(
@@ -105,6 +120,21 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
             Text(text = "Sign In with Google Coming Soon...")
         }
     }
+
+    LaunchedEffect(key1 = uiState.showToast) {
+        if (uiState.showToast) {
+            Toast.makeText(
+                context,
+                uiState.toastMessage,
+                Toast.LENGTH_SHORT,
+            ).show()
+            delay(2.seconds)
+            loginViewModel.resetToast()
+        }
+
+    }
+
+}
 }
 
 @Preview(showBackground = true)

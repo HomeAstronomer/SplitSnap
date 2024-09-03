@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serialization)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id ("kotlin-parcelize")
 
 
 }
@@ -115,6 +116,10 @@ dependencies {
     implementation("io.coil-kt:coil:2.7.0")
 
     implementation("io.coil-kt:coil-compose:2.7.0")
+
+    implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("com.google.code.gson:gson:2.11.0")
 
 //    implementation("com.google.android.gms:play-services-auth:21.2.0")
 

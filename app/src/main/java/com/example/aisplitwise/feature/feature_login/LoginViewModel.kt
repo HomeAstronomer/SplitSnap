@@ -1,14 +1,13 @@
 package com.example.aisplitwise.feature.feature_login
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aisplitwise.User
-import com.example.aisplitwise.UserDao
-import com.example.aisplitwise.feature.dashboard.DashboardUiState
+import com.example.aisplitwise.DashBoardRoute
+import com.example.aisplitwise.data.local.Member
+import com.example.aisplitwise.data.local.toMap
+import com.example.aisplitwise.data.repository.DataState
+import com.example.aisplitwise.data.repository.LoginRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,42 +16,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @Immutable
 data class LoginScreenUiState(
-    val emailId:String="",
-    val password:String=""
+    val showToast:Boolean=false,
+    val toastMessage:String=""
 
 )
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val localDataSource: UserDao,
+    private val loginRepository: LoginRepository,
     private val fireStoreDb: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ): ViewModel() {
-    fun emailLogin(email:String,password:String,
-                   onSuccess:(FirebaseUser?)->Unit,
-                   onError:(String?)->Unit) {
-        viewModelScope.launch {
-
-            val signInTask = firebaseAuth.createUserWithEmailAndPassword(email, password)
-            signInTask.addOnCompleteListener{ task ->
-                if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                   onSuccess.invoke(task.result.user)
-                } else {
-                    onError.invoke(task.exception?.message)
-
-                }
-            }
-
-            }
-
-    }
 
     private val _uiState = MutableStateFlow(LoginScreenUiState())
     val uiState: StateFlow<LoginScreenUiState> = _uiState.stateIn(
@@ -60,5 +41,36 @@ class LoginViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = LoginScreenUiState()
     )
+
+    fun signIn(email:String, password:String,
+               onSuccess:(DashBoardRoute)->Unit) {
+        viewModelScope.launch {
+            loginRepository.firebaseAuthSignIn(email,password).collect{dataState->
+                when(dataState){
+                    is DataState.Success->{
+
+                        val fireBaseUser=dataState.data.user
+                        val route=DashBoardRoute(uid=fireBaseUser?.uid?:"",
+                            displayName = fireBaseUser?.displayName,
+                            email = fireBaseUser?.email,
+                            phoneNumber = fireBaseUser?.phoneNumber,
+                            photoUrl = fireBaseUser?.photoUrl?.path)
+                        onSuccess.invoke(route)
+                    }
+                    is DataState.Error->{
+                        _uiState.update { it.copy(showToast = true, toastMessage = dataState.errorMessage) }
+                    }
+                }
+            }
+
+
+        }
+
+    }
+
+    fun resetToast() {
+        _uiState.update { it.copy(showToast = false, toastMessage ="") }
+    }
+
 
 }
