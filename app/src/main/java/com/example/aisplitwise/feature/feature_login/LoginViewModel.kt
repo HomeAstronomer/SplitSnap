@@ -4,12 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aisplitwise.DashBoardRoute
-import com.example.aisplitwise.data.local.Member
-import com.example.aisplitwise.data.local.toMap
 import com.example.aisplitwise.data.repository.DataState
-import com.example.aisplitwise.data.repository.LoginRepository
+import com.example.aisplitwise.data.repository.MemberRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,9 +27,7 @@ data class LoginScreenUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginRepository: LoginRepository,
-    private val fireStoreDb: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val memberRepository: MemberRepository,
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenUiState())
@@ -43,19 +38,12 @@ class LoginViewModel @Inject constructor(
     )
 
     fun signIn(email:String, password:String,
-               onSuccess:(DashBoardRoute)->Unit) {
+               onSuccess:()->Unit) {
         viewModelScope.launch {
-            loginRepository.firebaseAuthSignIn(email,password).collect{dataState->
+            memberRepository.firebaseAuthSignIn(email,password).collect{ dataState->
                 when(dataState){
                     is DataState.Success->{
-
-                        val fireBaseUser=dataState.data.user
-                        val route=DashBoardRoute(uid=fireBaseUser?.uid?:"",
-                            displayName = fireBaseUser?.displayName,
-                            email = fireBaseUser?.email,
-                            phoneNumber = fireBaseUser?.phoneNumber,
-                            photoUrl = fireBaseUser?.photoUrl?.path)
-                        onSuccess.invoke(route)
+                        onSuccess.invoke()
                     }
                     is DataState.Error->{
                         _uiState.update { it.copy(showToast = true, toastMessage = dataState.errorMessage) }

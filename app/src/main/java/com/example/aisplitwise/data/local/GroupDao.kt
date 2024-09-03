@@ -83,4 +83,11 @@ interface GroupDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(groups:List<Group>)
+
+    @Query("""
+        UPDATE GROUP_TABLE 
+        SET expenses = :updatedExpenses, updatedAt = :updatedAt 
+        WHERE id = :groupId
+    """)
+    fun updateExpensesAndTimestamp(groupId: String, updatedExpenses: List<Expense>, updatedAt: String)
 }

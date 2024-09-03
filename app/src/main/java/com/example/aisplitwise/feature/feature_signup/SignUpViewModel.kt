@@ -4,13 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aisplitwise.DashBoardRoute
-import com.example.aisplitwise.data.local.Member
-import com.example.aisplitwise.data.local.toMap
 import com.example.aisplitwise.data.repository.DataState
-import com.example.aisplitwise.data.repository.LoginRepository
+import com.example.aisplitwise.data.repository.MemberRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,9 +26,7 @@ data class SignUpScreenUIState(
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
-    val loginRepository: LoginRepository,
-    private val fireStoreDb: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val memberRepository: MemberRepository,
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(SignUpScreenUIState())
@@ -47,24 +41,15 @@ class SignUpViewModel @Inject constructor(
         password: String,
         displayName:String,
         phoneNumber:String,
-        onSuccess: (DashBoardRoute) -> Unit,
+        onSuccess: () -> Unit,
     ) {
 
 
         viewModelScope.launch {
-            loginRepository.signup(email, password, displayName, phoneNumber).collect { dataState ->
+            memberRepository.signup(email, password, displayName, phoneNumber).collect { dataState ->
                 when (dataState) {
                     is DataState.Success -> {
-
-                        val fireBaseUser = dataState.data
-                        val route = DashBoardRoute(
-                            uid = fireBaseUser?.uid ?: "",
-                            displayName = fireBaseUser?.displayName,
-                            email = fireBaseUser?.email,
-                            phoneNumber = fireBaseUser?.phoneNumber,
-                            photoUrl = fireBaseUser?.photoUrl?.path
-                        )
-                        onSuccess.invoke(route)
+                        onSuccess.invoke()
                     }
 
                     is DataState.Error -> {
@@ -85,11 +70,6 @@ class SignUpViewModel @Inject constructor(
     fun resetToast() {
         _uiState.update { it.copy(showToast = false, toastMessage ="") }
     }
-
-
-
-
-
 
 }
 

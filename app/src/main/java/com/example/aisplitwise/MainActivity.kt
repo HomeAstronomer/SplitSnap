@@ -23,8 +23,6 @@ import kotlin.random.Random
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var firebaseAuth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,8 +32,7 @@ class MainActivity : ComponentActivity() {
 
 
             AISplitwiseTheme {
-
-                NavHostInitializer(navController, firebaseAuth.currentUser)
+                NavHostInitializer(navController)
             }
 
         }

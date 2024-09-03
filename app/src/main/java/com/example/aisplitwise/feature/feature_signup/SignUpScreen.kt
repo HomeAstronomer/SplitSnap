@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.aisplitwise.DashBoardRoute
 import com.example.aisplitwise.LoginScreenRoute
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
@@ -100,7 +101,7 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel, navController: NavHostControl
             Button(
                 onClick = { signUpViewModel.signup( email, password,name, phoneNumber,
                     onSuccess = {
-                        navController.navigate(it){
+                        navController.navigate(DashBoardRoute){
                             popUpTo<LoginScreenRoute>{
                                 LoginScreenRoute
                                 inclusive=true

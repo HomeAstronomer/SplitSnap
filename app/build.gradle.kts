@@ -4,10 +4,9 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.hilt)
     alias(libs.plugins.jetbrains.kotlin.serialization)
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     id ("kotlin-parcelize")
-
 
 }
 
@@ -106,20 +105,24 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(platform("com.google.firebase:firebase-bom:33.2.0"))
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(platform(libs.firebase.bom))
 
-    implementation("com.google.firebase:firebase-crashlytics")
+    // Use the Firebase bundle
+    implementation(libs.bundles.firebase)
 
-    implementation("com.google.firebase:firebase-auth")
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
 
-    implementation("io.coil-kt:coil:2.7.0")
 
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation(libs.androidx.material.icons.extended)
 
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material.icons.extended)
 
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation(libs.lottie.compose)
+
+    implementation(libs.gson)
+
+
 
 //    implementation("com.google.android.gms:play-services-auth:21.2.0")
 

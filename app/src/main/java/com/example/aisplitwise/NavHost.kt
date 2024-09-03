@@ -5,23 +5,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.example.aisplitwise.feature.dashboard.DashBoard
 import com.example.aisplitwise.feature.dashboard.DashboardViewModel
 import com.example.aisplitwise.feature.feature_login.LoginScreen
 import com.example.aisplitwise.feature.feature_signup.SignUpScreen
+import com.example.aisplitwise.feature.feature_splash.SplashScreen
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class DashBoardRoute(
-    val uid:String="",
-    val displayName: String?,
-    val email: String?,
-    val phoneNumber: String?,
-    val photoUrl: String?
-)
+object SplashRoute
+@Serializable
+object DashBoardRoute
 
 @Serializable
 object LoginScreenRoute
@@ -29,17 +25,15 @@ object LoginScreenRoute
 object SignUpScreenRoute
 
 @Composable
-fun NavHostInitializer(navController: NavHostController, currentUser: FirebaseUser?) {
-    var initScreen:Any=LoginScreenRoute
-    if (currentUser != null) {
-       initScreen=DashBoardRoute(currentUser.uid,currentUser.displayName,currentUser.email,currentUser.phoneNumber,currentUser.photoUrl?.path)
-    }
-    NavHost(navController = navController, startDestination = initScreen) {
+fun NavHostInitializer(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = SplashRoute) {
+        composable<SplashRoute> {
+            SplashScreen(hiltViewModel(),navController)
+        }
+
         composable<DashBoardRoute> {
-            val args = it.toRoute<DashBoardRoute>()
             val dashBoardViewModel = hiltViewModel<DashboardViewModel>()
-            DashBoard(args,
-                dashBoardViewModel)
+            DashBoard(dashBoardViewModel)
         }
 
 

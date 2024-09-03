@@ -1,6 +1,5 @@
 package com.example.aisplitwise.feature.dashboard
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,23 +46,28 @@ import java.util.Date
 
 
 @Composable
-fun DashBoard(navArgs: DashBoardRoute, dashBoardViewModel: DashboardViewModel) {
+fun DashBoard( dashBoardViewModel: DashboardViewModel) {
     val uiState by dashBoardViewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(modifier=Modifier,topBar = { DashboardHeader(navArgs) }) { padding ->
+    Scaffold(modifier=Modifier,topBar = { DashboardHeader(uiState.member) }) { padding ->
         DashBoardContent(
             modifier = Modifier
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
                 .safeContentPadding(),
-            navArgs,
             dashBoardViewModel::createGroup,
-            dashBoardViewModel::getNewgroupId,
-            uiState.groupList,
-            dashBoardViewModel::getListOfMemberGroups,
-            dashBoardViewModel::getGroups
+            dashBoardViewModel::getGroupsApiCall,
+            uiState.groupList
         )
 
+
+
+    }
+    if(uiState.showLoader) {
+        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
+            CircularProgressIndicator(Modifier.size(64.dp).align(Alignment.Center),
+                strokeWidth =8.dp )
+        }
     }
 
 }
@@ -70,12 +75,9 @@ fun DashBoard(navArgs: DashBoardRoute, dashBoardViewModel: DashboardViewModel) {
 @Composable
 fun DashBoardContent(
     modifier: Modifier = Modifier,
-    navArgs: DashBoardRoute,
-    createGroup: (Group, () -> Unit, (String) -> Unit, String) -> Unit,
-    getNewgroupId: () -> String,
-    groupList: List<Group> = emptyList(),
-    getListOfMemberGroups: ((Member) -> Unit) -> Unit,
-    getGroups: (Member) -> Unit
+    createGroup: () -> Unit,
+    getGroupsApiCall: () -> Unit,
+    groupList: List<Group> = emptyList()
 ) {
     val context = LocalContext.current
     Box(modifier = modifier) {
@@ -91,41 +93,7 @@ fun DashBoardContent(
                         .weight(1f),
                     style = MaterialTheme.typography.headlineMedium,
                 )
-                Button(onClick = {
-                    val group = Group(
-                        id = getNewgroupId(),
-                        name = "The Boys",
-                        members = listOf(
-                            Member(
-                                uid = navArgs.uid,
-                                displayName = navArgs.displayName,
-                                email = navArgs.email,
-                                phoneNumber = navArgs.phoneNumber,
-                                photoUrl = navArgs.photoUrl,
-                                createdGroupIds = emptyList(),
-                                joinedGroupIds = emptyList()
-                            )
-                        ),
-                        createdAt = Timestamp(Date()),
-                        updatedAt = Timestamp(Date()),
-                        expenses = emptyList()
-                    )
-                    createGroup(group,
-                        {
-                            Toast.makeText(
-                                context, "Group Created Successfully ",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        },
-                        { error ->
-                            Toast.makeText(
-                                context, error,
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        },
-                        navArgs.uid
-                    )
-                }) {
+                Button(onClick = { createGroup() }) {
                     Icon(
                         imageVector = Icons.Rounded.Add, // Replace with your icon resource
                         contentDescription = "Create Group", // Replace with your string resource
@@ -141,12 +109,12 @@ fun DashBoardContent(
 
                 Icon(
                     imageVector = Icons.Rounded.Replay, // Replace with your icon resource
-                    contentDescription = "Create Group", // Replace with your string resource
-                    modifier = Modifier.size(24.dp).clickable {
-                        getListOfMemberGroups {member->
-                            getGroups(member)
+                    contentDescription = "Refresh Group", // Replace with your string resource
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable {
+                            getGroupsApiCall.invoke()
                         }
-                    }
                 )
 
 
@@ -171,7 +139,7 @@ fun DashBoardContent(
 
 @Composable
 fun DashboardHeader(
-    route: DashBoardRoute
+    route: Member?
 ) {
     Box(
         modifier = Modifier
@@ -190,7 +158,7 @@ fun DashboardHeader(
             val context= LocalContext.current
 
             SubcomposeAsyncImage(model = ImageRequest.Builder(context)
-                .data(route.photoUrl ?: "")
+                .data(route?.photoUrl ?: "")
                 .crossfade(true)
                 .build(), contentDescription = "",
                 loading = {
@@ -210,17 +178,17 @@ fun DashboardHeader(
 
             Column {
                 Text(
-                    text = route.displayName ?: "No Name",
+                    text = route?.displayName ?: "No Name",
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = route.email ?: "No Email",
+                    text = route?.email ?: "No Email",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text =route.phoneNumber?.ifNullOrEmpty { "No Phone Number" }?:"No Phone Number",
+                    text =route?.phoneNumber?.ifNullOrEmpty { "No Phone Number" }?:"No Phone Number",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -231,15 +199,9 @@ fun DashboardHeader(
 @Preview(showBackground = true)
 @Composable
 fun DashboardHeaderPreview() {
-    Surface(color = Color.White) {
-        DashboardHeader(
-            route = DashBoardRoute(
-                displayName = "John Doe",
-                email = "john.doe@example.com",
-                phoneNumber = "+1234567890",
-                photoUrl = "https://example.com/photo.jpg"
-            )
-        )
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
+        CircularProgressIndicator(Modifier.size(64.dp).align(Alignment.Center),
+            strokeWidth =8.dp )
     }
 }
 
@@ -250,15 +212,9 @@ fun DashboardContentPreview() {
 
         DashBoardContent(
             Modifier,
-            navArgs = DashBoardRoute(
-                displayName = "John Doe",
-                email = "john.doe@example.com",
-                phoneNumber = "+1234567890",
-                photoUrl = "https://example.com/photo.jpg"
-            ),
-            createGroup = {_,_,_,_->},
-            getNewgroupId = {""},
-            listOf(
+            createGroup = {},
+            getGroupsApiCall = {},
+            groupList = listOf(
                 Group(
                     id = "group1",
              name = "Weekend Getaway",
@@ -268,9 +224,7 @@ fun DashboardContentPreview() {
              updatedAt = Timestamp(Date()),
              groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
          )
-            ),
-            {},
-            {}
+            )
         )
     }
 }

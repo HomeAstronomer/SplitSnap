@@ -83,8 +83,8 @@ Scaffold(modifier=Modifier.imePadding()) {padding->
 
         Button(
             onClick = {
-                loginViewModel.signIn(email, password) { dashboardRoute ->
-                    navController.navigate(dashboardRoute)
+                loginViewModel.signIn(email, password) {
+                    navController.navigate(DashBoardRoute)
                 }
             },
             modifier = Modifier

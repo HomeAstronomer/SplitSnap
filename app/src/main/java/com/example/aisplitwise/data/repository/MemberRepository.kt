@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LoginRepository @Inject constructor(
+class MemberRepository @Inject constructor(
     private val memberDao: MemberDao,
     private val fireStoreDb: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
@@ -123,6 +123,11 @@ class LoginRepository @Inject constructor(
             null // Indicate that there was an error
         }
     }
+
+    fun getMemberDb(): Flow<List<Member>> {
+        return memberDao.getAllFlow()
+    }
+
 
 
 
