@@ -1,7 +1,10 @@
-package com.example.aisplitwise
+package com.example.aisplitwise.data
 
 import android.content.Context
 import androidx.room.Room
+import com.example.aisplitwise.AppDatabase
+import com.example.aisplitwise.data.local.GroupDao
+import com.example.aisplitwise.data.local.MemberDao
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,7 +19,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+object ProviderModule {
 
     @Singleton
     @Provides
@@ -41,9 +44,9 @@ object DatabaseModule {
     }
 
 
-
-
+    @Provides
+    fun provideMemberDao(database: AppDatabase): MemberDao = database.memberDao()
 
     @Provides
-    fun provideTaskDao(database: AppDatabase): UserDao = database.userDao()
+    fun provideGroupDao(database: AppDatabase): GroupDao = database.groupDao()
 }

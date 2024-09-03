@@ -1,49 +1,19 @@
 package com.example.aisplitwise
 
-import androidx.compose.runtime.Stable
-import androidx.room.ColumnInfo
-import androidx.room.Dao
 import androidx.room.Database
-import androidx.room.Delete
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
 import androidx.room.RoomDatabase
-import kotlinx.coroutines.flow.Flow
-@Stable
-@Entity
-data class User(
-    @PrimaryKey val uid: Int,
-    @ColumnInfo(name = "first_name") val firstName: String?,
-    @ColumnInfo(name = "last_name") val lastName: String?
-)
+import androidx.room.TypeConverters
+import com.example.aisplitwise.data.local.Converters
+import com.example.aisplitwise.data.local.Group
+import com.example.aisplitwise.data.local.GroupDao
+import com.example.aisplitwise.data.local.Member
+import com.example.aisplitwise.data.local.MemberDao
 
-@Dao
-interface UserDao {
-    @Query("SELECT * FROM user")
-    fun getAll(): List<User>
-
-    @Query("SELECT * FROM user WHERE uid IN (:userIds)")
-    fun loadAllByIds(userIds: IntArray): List<User>
-
-    @Query("SELECT * FROM user WHERE first_name LIKE :first AND " +
-            "last_name LIKE :last LIMIT 1")
-    fun findByName(first: String, last: String): User
-
-    @Insert
-    fun insertAll(vararg users: User)
-
-
-
-    @Delete
-    fun delete(user: User)
-
-    @Query("SELECT * FROM user")
-    fun getAllFlow(): Flow<List<User>>
-}
-
-@Database(entities = [User::class], version = 1)
+@Database(entities = [Group::class,
+                     Member::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun userDao(): UserDao
+    abstract fun memberDao(): MemberDao
+
+    abstract fun groupDao():GroupDao
 }

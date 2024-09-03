@@ -30,32 +30,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            firebaseAuth
 
-            val db = Room.databaseBuilder(
-                applicationContext,
-                AppDatabase::class.java, "database-name"
-            ).build()
-            val userDao=db.userDao()
-            var users: List<User> = emptyList()
-            val rand=Random.Default
-            LaunchedEffect(key1 = Unit) {
-                withContext(Dispatchers.IO) {
-                    users= userDao.getAll()
 
-                    delay(1000)
-                    userDao.insertAll(
-                        User(
-                            uid = rand.nextInt(),
-                            firstName = "Atharva",
-                            lastName = "Gorule"
-                        )
-                    )
-                }
 
+            AISplitwiseTheme {
+
+                NavHostInitializer(navController, firebaseAuth.currentUser)
             }
-
-            NavHostInitializer(navController,firebaseAuth.currentUser)
 
         }
     }
