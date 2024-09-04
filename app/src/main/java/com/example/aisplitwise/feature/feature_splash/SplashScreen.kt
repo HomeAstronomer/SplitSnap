@@ -43,25 +43,23 @@ fun SplashScreen(splashViewModel: SplashViewModel, navController: NavHostControl
             contentScale = ContentScale.FillBounds
         )
     }
-   LaunchedEffect(key1 = progress) {
-      if(progress>=0.25f) {
-          withContext(Dispatchers.Main) {
-              if (splashViewModel.isLoggedIn) {
-                  navController.navigate(DashBoardRoute) {
-                      popUpTo(SplashRoute) { inclusive = true }
-                  }
-              } else {
-                  navController.navigate(LoginScreenRoute) {
-                      popUpTo(SplashRoute) { inclusive = true }
-                  }
+   var hasNavigated by remember { mutableStateOf(false) }
 
-
-              }
-          }
-      }
-
-
-
-   }
+    LaunchedEffect(key1 = progress) {
+        if (progress >= 0.25f && !hasNavigated) {
+            hasNavigated = true // Set the flag to prevent further navigation
+            withContext(Dispatchers.Main) {
+                if (splashViewModel.isLoggedIn) {
+                    navController.navigate(DashBoardRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(LoginScreenRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
 
 }
