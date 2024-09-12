@@ -43,4 +43,5 @@
 
 1. Android Studio (latest version recommended)
 2. Firebase Project setup with Authentication and Firestore enabled.
+Ruleset Bypass
 
