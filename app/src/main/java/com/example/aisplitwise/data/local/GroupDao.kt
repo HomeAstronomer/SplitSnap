@@ -79,7 +79,7 @@ interface GroupDao {
     fun getAllFlow(): Flow<List<Group>>
 
     @Insert
-    fun insert( group: Group)
+    suspend fun insert( group: Group)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(groups:List<Group>)

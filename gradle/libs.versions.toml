@@ -77,13 +77,16 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-storage = { module = "com.google.firebase:firebase-storage"}
+
+
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 
 
 [bundles]
-firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth"]
+firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth","firebase-storage"]
 # Plugin dependencies
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
