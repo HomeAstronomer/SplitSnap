@@ -35,9 +35,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.example.aisplitwise.DashBoardRoute
+import com.example.aisplitwise.CreateGroupRoute
 import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.utils.ifNullOrEmpty
@@ -46,7 +47,7 @@ import java.util.Date
 
 
 @Composable
-fun DashBoard( dashBoardViewModel: DashboardViewModel) {
+fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostController) {
     val uiState by dashBoardViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(modifier=Modifier,topBar = { DashboardHeader(uiState.member) }) { padding ->
@@ -55,7 +56,7 @@ fun DashBoard( dashBoardViewModel: DashboardViewModel) {
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
                 .safeContentPadding(),
-            dashBoardViewModel::createGroup,
+            {navController.navigate(CreateGroupRoute)},
             dashBoardViewModel::getGroupsApiCall,
             uiState.groupList
         )
@@ -125,7 +126,6 @@ fun DashBoardContent(
             LazyColumn {
                 items(groupList){it->
                     GroupCard(it){}
-
                 }
 
             }
@@ -151,8 +151,7 @@ fun DashboardHeader(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val context= LocalContext.current

@@ -1,4 +1,4 @@
-package com.example.aisplitwise
+package com.example.aisplitwise.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
