@@ -31,6 +31,10 @@ class GroupRepository @Inject constructor(
         return groupDao.getAllFlow()
     }
 
+    suspend fun getGroupFromID(groupId: String):Flow<Group>{
+        return groupDao.getGroup(groupId)
+    }
+
     fun getGroups(member: Member): Flow<DataState<List<Group>>> = flow {
 
         val joinedGroups = member.joinedGroupIds

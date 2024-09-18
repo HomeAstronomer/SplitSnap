@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import com.example.aisplitwise.feature.dashboard.DashBoard
 import com.example.aisplitwise.feature.dashboard.DashboardViewModel
 import com.example.aisplitwise.feature.feature_create_group.CreateGroupScreen
+import com.example.aisplitwise.feature.feature_ledger.LedgerScreen
 import com.example.aisplitwise.feature.feature_login.LoginScreen
 import com.example.aisplitwise.feature.feature_signup.SignUpScreen
 import com.example.aisplitwise.feature.feature_splash.SplashScreen
@@ -33,6 +34,9 @@ object SignUpScreenRoute
 
 @Serializable
 object CreateGroupRoute
+
+@Serializable
+data class LedgerRoute(val groupId:String="")
 
 @Composable
 fun NavHostInitializer(navController: NavHostController) {
@@ -75,6 +79,16 @@ fun NavHostInitializer(navController: NavHostController) {
         ) {
             CreateGroupScreen(
                 navController = navController)
+        }
+
+        composable<LedgerRoute>(
+            enterTransition = { slideInOutTransition(slideDirection = SlideDirection.LeftToRight).first() },
+            exitTransition = {slideInOutTransition(slideDirection = SlideDirection.LeftToRight).second() }
+        ) {
+            it.arguments
+            LedgerScreen(
+                navHostController = navController,
+                ledgerViewModel = hiltViewModel())
         }
 
     }

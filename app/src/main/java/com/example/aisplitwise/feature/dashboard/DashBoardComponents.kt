@@ -21,6 +21,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.aisplitwise.data.local.Group
+import com.example.aisplitwise.uiCore.atoms.ImageCompose
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,8 +42,7 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Group Image
-            val context= LocalContext.current
-            SubcomposeAsyncImage(modifier = Modifier
+            ImageCompose(Modifier
                 .size(96.dp)
                 .background(
                     MaterialTheme.colorScheme.surfaceContainer,
@@ -50,25 +50,8 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 )
                 .clip(RoundedCornerShape(12.dp))
                 .padding(8.dp),
-                model = ImageRequest.Builder(context)
-                    .data(group.groupImg)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "",
-                loading = {
-                    Icon(
-                        imageVector = Icons.Default.HourglassBottom, // Replace with your icon resource
-                        contentDescription = "Create Group", // Replace with your string resource
-                        modifier = Modifier.matchParentSize().padding(8.dp)
-                    )
-                },
-                error = {
-                    Icon(
-                        imageVector = Icons.Default.BrokenImage, // Replace with your icon resource
-                        contentDescription = "Create Group", // Replace with your string resource
-                        modifier = Modifier.matchParentSize().padding(8.dp)
-                    )
-                })
+                data=group.groupImg)
+
 
             Spacer(modifier = Modifier.width(16.dp))
 
@@ -80,10 +63,7 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Group Name
                 Text(
                     text = group.name,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                    style = MaterialTheme.typography.titleMedium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -91,10 +71,7 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Members Count
                 Text(
                     text = "${group.members.size} members",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    style = MaterialTheme.typography.bodyMedium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -102,10 +79,8 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Creation Date
                 Text(
                     text = "Created: ${formatDate(group.createdAt.toDate())}",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
