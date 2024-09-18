@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.aisplitwise.CreateGroupRoute
+import com.example.aisplitwise.LedgerRoute
 import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.utils.ifNullOrEmpty
@@ -58,7 +59,8 @@ fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostCont
                 .safeContentPadding(),
             {navController.navigate(CreateGroupRoute)},
             dashBoardViewModel::getGroupsApiCall,
-            uiState.groupList
+            uiState.groupList,
+            navigateGroup = {navController.navigate(LedgerRoute(it))}
         )
 
 
@@ -78,9 +80,9 @@ fun DashBoardContent(
     modifier: Modifier = Modifier,
     createGroup: () -> Unit,
     getGroupsApiCall: () -> Unit,
-    groupList: List<Group> = emptyList()
+    groupList: List<Group> = emptyList(),
+    navigateGroup:(String)->Unit
 ) {
-    val context = LocalContext.current
     Box(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             Row(
@@ -124,8 +126,10 @@ fun DashBoardContent(
             }
 
             LazyColumn {
-                items(groupList){it->
-                    GroupCard(it){}
+                items(groupList){
+                    GroupCard(it){
+                        navigateGroup.invoke(it.id)
+                    }
                 }
 
             }
@@ -223,7 +227,8 @@ fun DashboardContentPreview() {
              updatedAt = Timestamp(Date()),
              groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
          )
-            )
+            ),
+            navigateGroup = {}
         )
     }
 }
