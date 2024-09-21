@@ -12,10 +12,11 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 const val MEMBER_TABLE="member_table"
 @Parcelize
-@Stable
+@Serializable
 @Entity(tableName = MEMBER_TABLE)
 data class Member(
     @PrimaryKey
