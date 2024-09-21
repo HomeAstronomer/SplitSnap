@@ -1,6 +1,5 @@
 package com.example.aisplitwise.data.repository
 
-import android.util.Log
 import com.example.aisplitwise.data.local.Expense
 import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.GroupDao
@@ -8,7 +7,7 @@ import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.data.local.MemberDao
 import com.example.aisplitwise.data.local.toMap
 import com.example.aisplitwise.utils.MEMBER_COLLECTION
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -129,7 +128,7 @@ class GroupRepository @Inject constructor(
                 .set(expenseMap)
                 .await() // Use await to work with coroutines
             val newExpenseList=group.expenses+updatedExpense
-            groupDao.updateExpensesAndTimestamp(group.id,newExpenseList,getCurrentTimestamp())
+            groupDao.updateExpensesAndTimestamp(group.id,newExpenseList, Timestamp(Date()))
             emit(DataState.Success(Unit)) // Emit success state with no data
 
         } catch (e: Exception) {

@@ -50,8 +50,8 @@ data class Expense(
     val amount: Double = 0.0,
     val paidBy: Member = Member(),       // Default value using the no-argument constructor of Member
     val splitAmong: List<Member> = emptyList(),  // Default value as an empty list
-    val createdAt: Long = 0L,
-    val updatedAt: Long = 0L
+    val createdAt: Timestamp = Timestamp(Date()),
+    val updatedAt: Timestamp = Timestamp(Date()),
 ):Parcelable
 
 
@@ -92,5 +92,5 @@ interface GroupDao {
         SET expenses = :updatedExpenses, updatedAt = :updatedAt 
         WHERE id = :groupId
     """)
-    fun updateExpensesAndTimestamp(groupId: String, updatedExpenses: List<Expense>, updatedAt: String)
+    fun updateExpensesAndTimestamp(groupId: String, updatedExpenses: List<Expense>, updatedAt: Timestamp)
 }
