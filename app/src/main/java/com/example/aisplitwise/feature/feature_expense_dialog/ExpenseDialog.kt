@@ -1,6 +1,5 @@
 package com.example.aisplitwise.feature.feature_expense_dialog
 
-import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.aisplitwise.LedgerRoute
 import com.example.aisplitwise.data.local.Expense
 import com.example.aisplitwise.data.local.Member
 
@@ -60,6 +58,7 @@ fun ExpenseDialog(
                     this[member] = false
                 }
             } }
+
             Column(Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally){
                 Text(modifier = Modifier.padding(bottom=16.dp),

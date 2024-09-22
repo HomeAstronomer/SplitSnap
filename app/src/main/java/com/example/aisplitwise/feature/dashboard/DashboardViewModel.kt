@@ -64,9 +64,11 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun getGroupsApiCall() {
-       uiState.value.member?.let {
-           groupRepository.getGroups(it)
-       }
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.value.member?.let {
+                groupRepository.getGroups(it).collect {}
+            }
+        }
     }
 
     private fun getGroupsFromDb() {

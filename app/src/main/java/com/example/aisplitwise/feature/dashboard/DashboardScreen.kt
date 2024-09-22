@@ -2,6 +2,7 @@ package com.example.aisplitwise.feature.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,11 +17,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,12 +40,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.example.aisplitwise.CreateGroupRoute
-import com.example.aisplitwise.LedgerRoute
+import com.example.aisplitwise.navigation.CreateGroupRoute
+import com.example.aisplitwise.navigation.LedgerRoute
 import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.Member
+import com.example.aisplitwise.navigation.JoinGroupDialogRoute
 import com.example.aisplitwise.utils.ifNullOrEmpty
 import com.google.firebase.Timestamp
 import java.util.Date
@@ -60,15 +66,21 @@ fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostCont
             {navController.navigate(CreateGroupRoute)},
             dashBoardViewModel::getGroupsApiCall,
             uiState.groupList,
-            navigateGroup = {navController.navigate(LedgerRoute(it))}
+            navigateGroup = {navController.navigate(LedgerRoute(it))},
+            navController=navController
         )
 
 
 
     }
     if(uiState.showLoader) {
-        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
-            CircularProgressIndicator(Modifier.size(64.dp).align(Alignment.Center),
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
+            CircularProgressIndicator(
+                Modifier
+                    .size(64.dp)
+                    .align(Alignment.Center),
                 strokeWidth =8.dp )
         }
     }
@@ -81,51 +93,85 @@ fun DashBoardContent(
     createGroup: () -> Unit,
     getGroupsApiCall: () -> Unit,
     groupList: List<Group> = emptyList(),
-    navigateGroup:(String)->Unit
+    navigateGroup: (String) -> Unit,
+    navController: NavHostController
 ) {
     Box(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
-            Row(
-                Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Groups",
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .weight(1f),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Button(onClick = { createGroup() }) {
-                    Icon(
-                        imageVector = Icons.Rounded.Add, // Replace with your icon resource
-                        contentDescription = "Create Group", // Replace with your string resource
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Create Group", // Replace with your string resource
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
 
-                }
-
-                Icon(
-                    imageVector = Icons.Rounded.Replay, // Replace with your icon resource
-                    contentDescription = "Refresh Group", // Replace with your string resource
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable {
-                            getGroupsApiCall.invoke()
-                        }
-                )
-
-
-
-
-            }
 
             LazyColumn {
+                item{
+                    Row(
+                        Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Groups",
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f),
+                            style = MaterialTheme.typography.headlineMedium,
+                        )
+
+                        Icon(
+                            imageVector = Icons.Rounded.Replay, // Replace with your icon resource
+                            contentDescription = "Refresh Group", // Replace with your string resource
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable {
+                                    getGroupsApiCall.invoke()
+                                }
+                        )
+                    }
+
+                    Row(modifier=Modifier.padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        FilledTonalButton(
+                            onClick = {
+                                createGroup()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 4.dp)
+                        ) {
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ){
+                                Text(text = "Create Group")
+                                Icon(
+                                    imageVector = Icons.Default.MonetizationOn,
+                                    contentDescription = "Add Expense",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                        FilledTonalButton(
+                            onClick = {
+                                navController.navigate(JoinGroupDialogRoute(""))
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 4.dp),
+                        ) {
+                            Row(modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround) {
+                                Text(text = "Add Member")
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Profile",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
                 items(groupList){
                     GroupCard(it){
                         navigateGroup.invoke(it.id)
@@ -202,8 +248,13 @@ fun DashboardHeader(
 @Preview(showBackground = true)
 @Composable
 fun DashboardHeaderPreview() {
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
-        CircularProgressIndicator(Modifier.size(64.dp).align(Alignment.Center),
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
+        CircularProgressIndicator(
+            Modifier
+                .size(64.dp)
+                .align(Alignment.Center),
             strokeWidth =8.dp )
     }
 }
@@ -228,7 +279,8 @@ fun DashboardContentPreview() {
              groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
          )
             ),
-            navigateGroup = {}
+            navigateGroup = {},
+            navController = rememberNavController()
         )
     }
 }

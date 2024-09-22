@@ -27,10 +27,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.aisplitwise.DashBoardRoute
-import com.example.aisplitwise.SignUpScreenRoute
+import com.example.aisplitwise.navigation.DashBoardRoute
+import com.example.aisplitwise.navigation.SignUpScreenRoute
 import kotlinx.coroutines.delay
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
