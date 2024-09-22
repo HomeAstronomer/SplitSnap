@@ -20,8 +20,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.aisplitwise.DashBoardRoute
-import com.example.aisplitwise.LoginScreenRoute
+import com.example.aisplitwise.navigation.DashBoardRoute
+import com.example.aisplitwise.navigation.LoginScreenRoute
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 

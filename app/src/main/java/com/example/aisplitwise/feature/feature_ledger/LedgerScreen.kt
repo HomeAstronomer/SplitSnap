@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,11 +24,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,11 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.aisplitwise.data.local.Expense
 import com.example.aisplitwise.data.local.Member
+import com.example.aisplitwise.feature.feature_add_member.AddMemberDialog
+import com.example.aisplitwise.navigation.AddMemberDialogRoute
+import com.example.aisplitwise.navigation.JoinGroupDialogRoute
 import com.example.aisplitwise.uiCore.atoms.ImageCompose
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -69,50 +78,102 @@ fun LedgerScreen(
         }
     }
 
-    Scaffold(topBar = { LedgerScreenHeader { navHostController.popBackStack() } }) { padding ->
+    Scaffold(modifier=Modifier.navigationBarsPadding(),topBar = { LedgerScreenHeader { navHostController.popBackStack() } }) { padding ->
         uiState.group?.let { group ->
             LazyColumn(Modifier) {
                 item {
-                    Row(
-                        Modifier
-                            .padding(padding)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                            .padding(24.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ImageCompose(
+                    Column (Modifier
+                        .padding(padding)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(horizontal = 24.dp, vertical = 16.dp)){
+                        Row(
                             Modifier
-                                .size(96.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceContainer, shape = CircleShape
-                                )
-                                .clip(CircleShape)
-                                .padding(16.dp), data = group.groupImg
-                        )
-                        Column(
-                            Modifier
-                                .padding(start = 16.dp)
-                                .weight(1f)
+                                .padding(bottom=16.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Group Name", style = MaterialTheme.typography.bodyMedium
+                            ImageCompose(
+                                Modifier
+                                    .size(64.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                        shape = CircleShape
+                                    )
+                                    .clip(CircleShape)
+                                    .padding(8.dp), data = group.groupImg
                             )
-                            Text(
-                                text = group.name, style = MaterialTheme.typography.titleLarge
-                            )
+                            Column(
+                                Modifier
+                                    .padding(start = 16.dp)
+                                    .weight(1f)
+                            ) {
+                                Text(
+                                    text = "Group Name", style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = group.name, style = MaterialTheme.typography.titleLarge
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.AttachMoney,
+                                        contentDescription = "Amount",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+
+                                    Text(
+                                        text = "Members: ${group.members.joinToString(", ") { it.displayName ?: "" }}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 2
+                                    )
+                                }
+                            }
                         }
-
-                        Icon(imageVector = Icons.Default.Add, // Replace with your icon resource
-                            contentDescription = "Add Expense", // Replace with your string resource
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(MaterialTheme.colorScheme.surfaceContainer, CircleShape)
-                                .clip(CircleShape)
-                                .clickable {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedButton(
+                                onClick = {
                                     navigateToExpenseDialog.invoke(group.members)
-
-                                })
-
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 4.dp)
+                            ) {
+                                Row (
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceAround
+                                    ){
+                                    Text(text = "Add Expense")
+                                    Icon(
+                                        imageVector = Icons.Default.MonetizationOn,
+                                        contentDescription = "Add Expense",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    navHostController.navigate(AddMemberDialogRoute(groupId = group.id))
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 4.dp),
+                            ) {
+                                Row(modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceAround) {
+                                    Text(text = "Add Member")
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "Profile",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -121,7 +182,9 @@ fun LedgerScreen(
                         mutableStateOf(item.paidBy.uid == uiState.member?.uid)
                     }
                     Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
                         horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End
                     ) {
                         ExpenseCard(expense = item, isMe)

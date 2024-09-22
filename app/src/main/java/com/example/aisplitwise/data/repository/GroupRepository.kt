@@ -47,11 +47,26 @@ class GroupRepository @Inject constructor(
                     .get()
                     .await()
 
-                val groups = collection.documents.mapNotNull { document ->
-                    document.toObject(Group::class.java)
-                }
-                groupDao.insertAll(groups)
-                emit(DataState.Success(groups))
+                val groupsWithExpenses =
+                    collection.documents.mapNotNull { document ->
+                        val group = document.toObject(Group::class.java)
+                        group?.let {
+                                // Fetch the expenses sub-collection for this group
+                                val expensesSnapshot = fireStoreDb.collection("groups")
+                                    .document(document.id)
+                                    .collection("expenses")
+                                    .get()
+                                    .await()
+
+                                val expenses = expensesSnapshot.toObjects(Expense::class.java)
+
+                                // Attach expenses to the group object or modify it accordingly
+                                group.apply { this.expenses = expenses }
+                            }
+
+                    }
+                groupDao.insertAll(groupsWithExpenses)
+                emit(DataState.Success(groupsWithExpenses))
 
             } catch (e: Exception) {
                 emit(DataState.Error(e.message ?: "Error fetching groups"))
@@ -73,12 +88,7 @@ class GroupRepository @Inject constructor(
                 .set(groupMap)
                 .await()
 
-            addGroupIdToMember(uid, group.id)
-
-            fireStoreDb.collection(MEMBER_COLLECTION)
-                .document(uid)
-                .update("createdGroupIds", FieldValue.arrayUnion(group.id))
-                .await()
+            addGroupIdToMemberCreatedGroups(uid, group.id)
 
             groupDao.insert(group)
 
@@ -89,7 +99,46 @@ class GroupRepository @Inject constructor(
         }
     }
 
-    private suspend fun addGroupIdToMember(uid: String, groupId: String) {
+
+    // while joining group following  this occur
+    //addmember to group-> add group id to member joined groups  -> get the new Member -> add new member to db  -> call the get groups to refresh Groups
+    fun joinGroup(member: Member,groupId: String): Flow<DataState<Unit>> =flow {
+        try {
+        fireStoreDb.collection("groups")
+            .document(groupId)
+            .update("members", FieldValue.arrayUnion(member.toMap()))
+            val updatedMember=addGroupIdToMemberJoinedGroups(member.uid,groupId)
+            updatedMember?.let {
+                getGroups(it)
+            }
+            emit(DataState.Success(Unit))
+
+        } catch (e: Exception) {
+            emit(DataState.Error(e.message ?: "Something Went Wrong"))
+        }
+
+    }
+    private suspend fun addGroupIdToMemberJoinedGroups(uid: String, groupId: String):Member? {
+        // Update the Member's createdGroupIds in Firestore
+        fireStoreDb.collection(MEMBER_COLLECTION)
+            .document(uid)
+            .update("joinedGroupIds", FieldValue.arrayUnion(groupId))
+            .await()
+
+        // Fetch the updated Member from Firestore and add it to the local DAO
+        val memberDocument = fireStoreDb.collection(MEMBER_COLLECTION)
+            .document(uid)
+            .get()
+            .await()
+
+        val member = memberDocument.toObject(Member::class.java)
+        member?.let {
+            memberDao.insertMember(it)  // Assuming `insertOrUpdate` is a function that either inserts or updates a member in your DAO
+        }
+        return member
+    }
+
+    private suspend fun addGroupIdToMemberCreatedGroups(uid: String, groupId: String) {
         // Update the Member's createdGroupIds in Firestore
         fireStoreDb.collection(MEMBER_COLLECTION)
             .document(uid)

@@ -3,11 +3,8 @@ package com.example.aisplitwise.feature.feature_login
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aisplitwise.DashBoardRoute
 import com.example.aisplitwise.data.repository.DataState
 import com.example.aisplitwise.data.repository.MemberRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
