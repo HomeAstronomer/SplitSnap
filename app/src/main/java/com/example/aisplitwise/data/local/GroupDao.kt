@@ -24,7 +24,6 @@ data class Group(
     val id: String = "",
     val name: String = "",
     val members: List<Member> = emptyList(),  // Default value as an empty list
-    var expenses: List<Expense> = emptyList(),  // Default value as an empty list
     val createdAt: Timestamp = Timestamp(Date()),
     val updatedAt: Timestamp = Timestamp(Date()),
     val groupImg:String=""
@@ -42,31 +41,7 @@ fun Group.toMap(): Map<String, Any> {
     )
 }
 
-@Parcelize
-@Stable
-data class Expense(
-    val id: String = "",
-    val description: String = "",
-    val amount: Double = 0.0,
-    val paidBy: Member = Member(),       // Default value using the no-argument constructor of Member
-    val splitAmong: List<Member> = emptyList(),  // Default value as an empty list
-    val createdAt: Timestamp = Timestamp(Date()),
-    val updatedAt: Timestamp = Timestamp(Date()),
-):Parcelable
 
-
-
-fun Expense.toMap(): Map<String, Any> {
-    return mapOf(
-        "id" to id,
-        "description" to description,
-        "amount" to amount,
-        "paidBy" to paidBy.toMap(),
-        "splitAmong" to splitAmong.map { it.toMap() },
-        "createdAt" to createdAt,
-        "updatedAt" to updatedAt
-    )
-}
 @Dao
 interface GroupDao {
     @Query("SELECT * FROM $GROUP_TABLE")
@@ -89,8 +64,8 @@ interface GroupDao {
 
     @Query("""
         UPDATE GROUP_TABLE 
-        SET expenses = :updatedExpenses, updatedAt = :updatedAt 
+        SET updatedAt = :updatedAt 
         WHERE id = :groupId
     """)
-    fun updateExpensesAndTimestamp(groupId: String, updatedExpenses: List<Expense>, updatedAt: Timestamp)
+    fun updateExpensesAndTimestamp(groupId: String, updatedAt: Timestamp)
 }
