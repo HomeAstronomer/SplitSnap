@@ -1,6 +1,7 @@
 package com.example.aisplitwise.data.local
 
 import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.compose.runtime.Stable
 import androidx.room.Dao
 import androidx.room.Delete
@@ -15,7 +16,7 @@ import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 const val GROUP_TABLE="group_table"
-
+@Keep
 @Parcelize
 @Stable
 @Entity(tableName = GROUP_TABLE)
