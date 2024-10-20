@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.aisplitwise.data.repository.DataState
 import com.example.aisplitwise.data.repository.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -55,6 +56,14 @@ class LoginViewModel @Inject constructor(
 
     fun resetToast() {
         _uiState.update { it.copy(showToast = false, toastMessage ="") }
+    }
+
+    fun firebaseAuthWithGoogle(idToken: String,
+                               onSuccess:()->Unit) {
+        viewModelScope.launch (Dispatchers.IO) {
+            memberRepository.loginUsingGoogle(idToken,onSuccess)
+        }
+
     }
 
 

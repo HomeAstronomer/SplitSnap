@@ -1,16 +1,20 @@
 package com.example.aisplitwise.data.repository
 
+import android.util.Log
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.data.local.MemberDao
 import com.example.aisplitwise.data.local.toMap
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -128,9 +132,34 @@ class MemberRepository @Inject constructor(
         return memberDao.getAllFlow()
     }
 
+    suspend fun loginUsingGoogle(idToken: String,
+                                 onSuccess:()->Unit) {
+        try {
 
+        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+       FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).await()
 
+                    Log.d("SignIn", "signInWithCredential:success")
+                    val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val memberAdded=addUserToMembers(user, displayName = user.displayName?:"", phoneNumber = user.phoneNumber ?: "")
+                if (memberAdded!=null) {
+                    memberDao.deleteAllMembers()
+                    memberDao.insertMember(memberAdded)
+                    withContext(Dispatchers.Main) {
+                        onSuccess.invoke()
+                    }
+//                    emit(DataState.Success(currentUser))
+                }
+            }
+                    // Handle signed-in user
 
+            }
+        catch (e:Exception){
+            Log.d("SignIn", "signInWithCredential:failure", e)
+
+        }
+    }
 
 
 }

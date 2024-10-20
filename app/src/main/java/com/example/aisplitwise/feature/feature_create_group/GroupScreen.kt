@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -57,7 +58,8 @@ fun  CreateGroupScreen(
     val context= LocalContext.current
     Scaffold(
         Modifier
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .imePadding(),
         topBar = {
             CreateGroupHeader{
                 navController.popBackStack()
@@ -164,7 +166,7 @@ fun  CreateGroupScreen(
                     }) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp)
+                    .padding(horizontal = 24.dp,vertical = 24.dp)
             ) {
                 Text(text = "Create Group")
             }

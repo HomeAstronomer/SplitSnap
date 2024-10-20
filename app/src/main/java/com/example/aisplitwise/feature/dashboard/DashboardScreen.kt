@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
@@ -34,7 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -206,9 +209,10 @@ fun DashboardHeader(
         ) {
             val context= LocalContext.current
 
-            SubcomposeAsyncImage(model = ImageRequest.Builder(context)
+            SubcomposeAsyncImage(modifier=Modifier.size(64.dp).clip(CircleShape),model = ImageRequest.Builder(context)
                 .data(route?.photoUrl ?: "")
                 .crossfade(true)
+
                 .build(), contentDescription = "",
                 loading = {
                     Icon(
@@ -221,7 +225,8 @@ fun DashboardHeader(
                     imageVector = Icons.Rounded.AccountCircle, // Replace with your icon resource
                     contentDescription ="Create Group", // Replace with your string resource
                     modifier = Modifier.size(64.dp)
-                )})
+                )},
+                contentScale = ContentScale.FillBounds)
 
             Spacer(modifier = Modifier.width(16.dp))
 

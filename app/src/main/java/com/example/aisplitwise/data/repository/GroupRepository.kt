@@ -186,5 +186,23 @@ class GroupRepository @Inject constructor(
         return dateFormat.format(Date())
     }
 
+    suspend fun getExpenses(groupId: String): List<Expense> {
+         try {
+            val expensesSnapshot = fireStoreDb.collection("groups")
+                .document(groupId)
+                .collection("expenses")
+                .get()
+                .await()
+
+            val expenseList=expensesSnapshot.documents.mapNotNull { document ->
+                document.toObject(Expense::class.java)?.copy(id = document.id)
+            }
+            expenseDao.insertAll(expenseList)
+             return expenseList
+        } catch (e: Exception) {
+           return  emptyList() // Handle error case, returning an empty list or handling it another way
+        }
+    }
+
 
 }
