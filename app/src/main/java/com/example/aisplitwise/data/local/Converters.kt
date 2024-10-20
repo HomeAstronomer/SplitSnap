@@ -1,7 +1,8 @@
 package com.example.aisplitwise.data.local
 
 import androidx.room.TypeConverter
-import com.google.common.reflect.TypeToken
+import com.google.gson.reflect.TypeToken;
+
 import com.google.firebase.Timestamp
 import com.google.gson.Gson
 import java.text.SimpleDateFormat

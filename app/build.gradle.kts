@@ -27,17 +27,60 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        multiDexEnabled = true
+    }
+    signingConfigs {
+
+        create("release") {
+            // Make sure to secure these values using environment variables or other secure storage
+            keyAlias = "my-key-alias"
+            keyPassword = "@th@rv@N14"
+            storeFile = file("../my-release-key.jks")
+            storePassword = "@th@rv@N14"
+        }
     }
 
     buildTypes {
-        release {
+        // Debug build configuration
+       debug {
+
+            // Disable code shrinking and obfuscation for debug builds
             isMinifyEnabled = false
+            isShrinkResources = false
+
+            // Enable debug-specific logging
+            isDebuggable = true
+
+            // Use debug signing configuration
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        // Release build configuration
+       release {
+            // Enable code shrinking and obfuscation to reduce APK size and protect the code
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            // Use ProGuard rules or R8 for release builds
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // Disable debug-specific logging and make the build non-debuggable
+            isDebuggable = false
+
+            // Use release signing configuration
+            signingConfig = signingConfigs.getByName("release")
+
+            // Aligns the final APK to optimize it for the Play Store
+            isZipAlignEnabled = true
         }
     }
+
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Looper
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -191,25 +192,47 @@ fun ExpenseDialog(
 @Composable
 fun RequestLocationPermission(onPermissionGranted: () -> Unit) {
     var permissionGranted by remember { mutableStateOf(false) }
-
+    val context= LocalContext.current
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
+            // Permissions granted
+        } else {
+            // Permission denied, show a message
+            Toast.makeText(context, "Storage permission is required", Toast.LENGTH_SHORT).show()
+        }
+    }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        permissionGranted = isGranted
-        if (isGranted) {
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
+            // Permissions granted
+        } else {
+            // Permission denied, show a message
+            Toast.makeText(context, "Storage permission is required", Toast.LENGTH_SHORT).show()
+        }
+        permissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION]==true
+        if (permissionGranted) {
             onPermissionGranted()
         }
     }
 
     if (!permissionGranted) {
         Button(onClick = {
-            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            locationPermissionLauncher.launch(
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.ACCESS_FINE_LOCATION)
+            )
+//            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }) {
             Text("Grant Location Permission")
         }
     } else {
         Text("Permission Granted")
     }
+
 }
 
 @SuppressLint("MissingPermission")

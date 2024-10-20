@@ -1,14 +1,23 @@
 package com.example.aisplitwise
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +50,9 @@ import com.example.aisplitwise.utils.ifNullOrEmpty
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class AISplitwiseImageAcceptorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,12 +62,14 @@ class AISplitwiseImageAcceptorActivity : ComponentActivity() {
 
         setContent {
             AISplitwiseTheme {
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Black.copy(alpha = 0.8f)
                 ) {
+
                      ImageAcceptorScreen(imageUri)
-                    LoadImageAndRecognizeText(imageUri){}
+//                    LoadImageAndRecognizeText(imageUri){}
                 }
             }
         }
@@ -75,16 +90,31 @@ fun ImageAcceptorScreen(imageUri:String) {
     var recognizedText by remember { mutableStateOf("") }
 
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    val resultLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val uri = result.data!!.data
+            uri?.let {
+                // Save the recognized text to the selected location
+                context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                    outputStream.write(recognizedText.toByteArray())
+                }
+            }
+        }
+    }
     LaunchedEffect(request) {
         val result = (loader.execute(request) as? SuccessResult)?.drawable
         imageBitmap = drawableToBitmap(result)
         imageBitmap?.let { bitmap ->
             processImage(bitmap,onTextRecognized= { text ->
                 recognizedText = text
+                saveTextToScopedStorage(context,recognizedText,resultLauncher)
+                saveRecognizedTextToFile(context,text)
             },
                 error = {})
         }
+
     }
+
 
 
     Box(
@@ -116,12 +146,10 @@ fun ImageAcceptorScreen(imageUri:String) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text =recognizedText.ifNullOrEmpty { "No text recognised" },
-
-
-
-
-                color = Color.White)
+            TextField(recognizedText.ifNullOrEmpty { "No text recognised" },
+                onValueChange = {},
+                enabled = false,
+                )
         }
     }
 }
@@ -135,8 +163,9 @@ private fun processImage(bitmap: Bitmap, onTextRecognized: (String) -> Unit,erro
     // Process the image
     recognizer.process(image)
         .addOnSuccessListener { visionText ->
-            val recognizedText = visionText.text
-            Log.d("OCR", "Text Recognized: $recognizedText")
+            val recognizedText = visionText.text.replace("\n", " ").trim()
+            Log.d("OCR", "Text Recognized Original: \n ${visionText.text}")
+            Log.d("OCR", "Text Recognized : \n $recognizedText")
             onTextRecognized(recognizedText)
         }
         .addOnFailureListener { e ->
@@ -180,3 +209,102 @@ private fun drawableToBitmap(drawable: Drawable?): Bitmap? {
         null
     }
 }
+
+fun saveRecognizedTextToFile(context: Context, recognizedText: String) {
+    // Define the folder path where the files will be saved
+    val folderName = "OCRResults"
+    val storageDir = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), folderName)
+
+    // Create the directory if it doesn't exist
+    if (!storageDir.exists()) {
+        storageDir.mkdirs()
+    }
+
+    // Find the next available filename with incrementing numbers (OCR-1.txt, OCR-2.txt, etc.)
+    var fileNumber = 1
+    var textFile = File(storageDir, "OCR-$fileNumber.txt")
+
+    // Check if the file already exists, increment the number until we find an unused filename
+    while (textFile.exists()) {
+        fileNumber++
+        textFile = File(storageDir, "OCR-$fileNumber.txt")
+    }
+
+    // Write the recognized text to the file
+    try {
+        FileOutputStream(textFile).use { outputStream ->
+            outputStream.write(recognizedText.toByteArray())
+            outputStream.flush()
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+}
+
+@Composable
+fun requestPermissions() {
+    val context= LocalContext.current
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true &&
+            permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true) {
+            // Permissions granted
+        } else {
+            // Permission denied, show a message
+            Toast.makeText(context, "Storage permission is required", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    requestPermissionLauncher.launch(
+        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+    )
+}
+
+
+fun saveRecognizedTextToPublicDocuments(context: Context, recognizedText: String) {
+    // Define the folder path where the files will be saved (in the public Documents directory)
+    val folderName = "OCRResults"
+    val storageDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
+
+    // Create the directory if it doesn't exist
+    if (!storageDir.exists()) {
+        storageDir.mkdirs()
+    }
+
+    // Find the next available filename with incrementing numbers (OCR-1.txt, OCR-2.txt, etc.)
+    var fileNumber = 1
+    var textFile = File(storageDir, "OCR-$fileNumber.txt")
+
+    // Check if the file already exists, increment the number until we find an unused filename
+    while (textFile.exists()) {
+        fileNumber++
+        textFile = File(storageDir, "OCR-$fileNumber.txt")
+    }
+
+    // Write the recognized text to the file
+    try {
+        FileOutputStream(textFile).use { outputStream ->
+            outputStream.write(recognizedText.toByteArray())
+            outputStream.flush()
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+}
+
+fun saveTextToScopedStorage(context: Context, recognizedText: String, resultLauncher: ActivityResultLauncher<Intent>) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TITLE, "OCR-1.txt")
+        }
+        resultLauncher.launch(intent)
+    } else {
+        // For Android versions below Q, you can use the old method
+        saveRecognizedTextToPublicDocuments(context, recognizedText)
+    }
+}
+
+
