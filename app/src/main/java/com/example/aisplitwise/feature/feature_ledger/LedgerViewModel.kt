@@ -49,6 +49,7 @@ class LedgerViewModel @Inject constructor(
     init {
         getGroup(savedStateHandle.toRoute<LedgerRoute>().groupId)
         getMembersFromDb()
+
     }
 
     private fun getGroup(groupId: String) {
@@ -63,6 +64,9 @@ class LedgerViewModel @Inject constructor(
                 _uiState.update { it.copy(expense = expense) }
 
             }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            groupRepository.getExpenses(groupId =groupId )
         }
     }
     private fun getMembersFromDb() {

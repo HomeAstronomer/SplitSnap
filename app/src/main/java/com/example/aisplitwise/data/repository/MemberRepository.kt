@@ -1,11 +1,13 @@
 package com.example.aisplitwise.data.repository
 
+import android.util.Log
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.data.local.MemberDao
 import com.example.aisplitwise.data.local.toMap
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +21,7 @@ class MemberRepository @Inject constructor(
     private val memberDao: MemberDao,
     private val fireStoreDb: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
-){
+) {
 
     fun firebaseAuthSignIn(email: String, password: String): Flow<DataState<AuthResult>> = flow {
         try {
@@ -41,7 +43,7 @@ class MemberRepository @Inject constructor(
         }
     }
 
-    private suspend fun getMemberFromFirestore(uid: String): Member? {
+    suspend fun getMemberFromFirestore(uid: String): Member? {
         return try {
             val documentSnapshot = fireStoreDb.collection("Members").document(uid).get().await()
             if (documentSnapshot.exists()) {
@@ -58,10 +60,7 @@ class MemberRepository @Inject constructor(
     }
 
     fun signup(
-        email: String,
-        password: String,
-        displayName: String,
-        phoneNumber: String
+        email: String, password: String, displayName: String, phoneNumber: String
     ): Flow<DataState<FirebaseUser?>> = flow {
         try {
             // Sign up using Firebase Auth
@@ -72,7 +71,8 @@ class MemberRepository @Inject constructor(
                 // Add user to Members collection
                 val memberAdded = addUserToMembers(currentUser, displayName, phoneNumber)
 
-                if (memberAdded!=null) {
+
+                if (memberAdded != null) {
                     memberDao.deleteAllMembers()
                     memberDao.insertMember(memberAdded)
                     emit(DataState.Success(currentUser))
@@ -88,9 +88,7 @@ class MemberRepository @Inject constructor(
     }
 
     private suspend fun addUserToMembers(
-        currentUser: FirebaseUser,
-        displayName: String,
-        phoneNumber: String
+        currentUser: FirebaseUser, displayName: String, phoneNumber: String
     ): Member? {
         return try {
             val member = Member(
@@ -100,9 +98,8 @@ class MemberRepository @Inject constructor(
                 phoneNumber = phoneNumber,
                 photoUrl = currentUser.photoUrl?.toString()
             )
-            val profileChangeRequest = UserProfileChangeRequest.Builder()
-                .setDisplayName(displayName)
-                .build()
+            val profileChangeRequest =
+                UserProfileChangeRequest.Builder().setDisplayName(displayName).build()
 
             // Update Firebase Auth profile
             currentUser.updateProfile(profileChangeRequest).await()
@@ -111,10 +108,7 @@ class MemberRepository @Inject constructor(
             val memberMap = member.toMap()
 
             // Add the Member to the "Members" collection in Firestore
-            fireStoreDb.collection("Members")
-                .document(currentUser.uid)
-                .set(memberMap)
-                .await()
+            fireStoreDb.collection("Members").document(currentUser.uid).set(memberMap).await()
 
             member // Indicate that the member was successfully added
         } catch (e: Exception) {
@@ -128,8 +122,41 @@ class MemberRepository @Inject constructor(
         return memberDao.getAllFlow()
     }
 
+    suspend fun loginUsingGoogle(
+        idToken: String,
+    ): Flow<DataState<Member?>> = flow {
+        try {
 
+            val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+            FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).await()
 
+            Log.d("SignIn", "signInWithCredential:success")
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                var member = getMemberFromFirestore(user.uid)
+                if (member == null) {
+                    member = addUserToMembers(
+                        user,
+                        displayName = user.displayName ?: "",
+                        phoneNumber = user.phoneNumber ?: ""
+                    )
+                }
+                if (member != null) {
+                    memberDao.deleteAllMembers()
+                    memberDao.insertMember(member)
+                    emit(DataState.Success(member))
+                }
+            }else{
+                emit(DataState.Error( "Something Went Wrong,Issue With Google Login"))
+            }
+            // Handle signed-in user
+
+        } catch (e: Exception) {
+            Log.d("SignIn", "signInWithCredential:failure", e)
+            emit(DataState.Error(e.message ?: "Something Went Wrong"))
+
+        }
+    }
 
 
 
