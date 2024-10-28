@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -24,12 +25,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.HourglassBottom
-import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,7 +57,7 @@ fun  CreateGroupScreen(
     createGroupViewModel: CreateGroupViewModel = hiltViewModel(),
     navController: NavHostController
 ){
-    val uiState=createGroupViewModel.uiState.collectAsState()
+    val uiState by createGroupViewModel.uiState.collectAsState()
     val context= LocalContext.current
     Scaffold(
         Modifier
@@ -65,112 +68,165 @@ fun  CreateGroupScreen(
                 navController.popBackStack()
             }
         }) {padding->
-        Column (Modifier.padding(padding)){
-            var groupName by remember {
-                mutableStateOf("")
-            }
-            var selectedImage by remember {
-                mutableStateOf("")
-            }
-            Text(modifier=Modifier.padding(vertical = 16.dp,horizontal=24.dp),
-                text = "Provide a Suitable Name for the Group and Select A Image",
-                style = MaterialTheme.typography.titleMedium)
-            TextField(
-                value = groupName,
-                onValueChange = { groupName = it },
-                label = { Text("Group Name") },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Unspecified
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
+        var groupName by remember {
+            mutableStateOf("")
+        }
+        var selectedImage by remember {
+            mutableStateOf("")
+        }
+        Box(Modifier.padding(padding)) {
+            Column() {
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp).padding(horizontal = 24.dp),
+                    text = "Provide a Suitable Name for the Group",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                OutlinedTextField(
+                    value = groupName,
+                    onValueChange = { groupName = it },
+                    label = { Text("Group Name") },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Unspecified
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
+                )
 
-            Text(modifier=Modifier.padding(vertical = 16.dp,horizontal=24.dp),
-                text = "Select a Image that matches vibe of group")
-
-            LazyVerticalGrid(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp), columns = GridCells.Fixed(3)
-            ) {
-                items(uiState.value.imgList) { item ->
-                    val selected by remember(selectedImage) {
-                        mutableStateOf(item.compareTo(selectedImage)==0)
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp).padding(horizontal = 24.dp),
+                    text = "Select a Image that matches vibe of group"
+                )
+                if(uiState.imgList.isEmpty()){
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 24.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier,
+                                text = "Loading Images"
+                            )
+                            CircularProgressIndicator(Modifier.size(24.dp))
+                        }
                     }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .aspectRatio(1f)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainer,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .clip(RoundedCornerShape(16.dp))
-                            .clickable { selectedImage = item }
-                            .border(
-                                width = if (selected) 2.dp else 0.dp, // Add border if selected is true
-                                color = if (selected) MaterialTheme.colorScheme.secondary else Color.Transparent,
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                    ) {
-                        SubcomposeAsyncImage(modifier = Modifier
-                            .matchParentSize()
-                            .align(Alignment.Center)
-                            .padding(16.dp),
-                            model = ImageRequest.Builder(context)
-                                .data(item)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = "",
-                            loading = {
-                                Icon(
-                                    imageVector = Icons.Default.HourglassBottom, // Replace with your icon resource
-                                    contentDescription = "Create Group", // Replace with your string resource
-                                    modifier = Modifier.matchParentSize()
-                                )
-                            },
-                            error = {
-                                Icon(
-                                    imageVector = Icons.Default.BrokenImage, // Replace with your icon resource
-                                    contentDescription = "Create Group", // Replace with your string resource
-                                    modifier = Modifier.matchParentSize()
-                                )
-                            })
+                }else {
 
-                        if (selected) {
-                            Icon(
-                                imageVector = Icons.Default.Check, // Tick mark icon
-                                contentDescription = "Selected",
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 24.dp), columns = GridCells.Fixed(4)
+                    ) {
+                        items(uiState.imgList) { item ->
+                            val selected by remember(selectedImage) {
+                                mutableStateOf(item.compareTo(selectedImage) == 0)
+                            }
+                            Box(
                                 modifier = Modifier
-                                    .size(20.dp)
-                                    .align(Alignment.TopEnd)
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                                    .aspectRatio(1f)
                                     .background(
-                                        MaterialTheme.colorScheme.secondary,
-                                        shape = RoundedCornerShape(4.dp)
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                        shape = RoundedCornerShape(16.dp)
                                     )
-                                    .padding(4.dp),
-                            tint = MaterialTheme.colorScheme.onSecondary
-                            )
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .clickable { selectedImage = item }
+                                    .border(
+                                        width = if (selected) 2.dp else 0.dp, // Add border if selected is true
+                                        color = if (selected) MaterialTheme.colorScheme.secondary else Color.Transparent,
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                            ) {
+                                SubcomposeAsyncImage(modifier = Modifier
+                                    .matchParentSize()
+                                    .align(Alignment.Center)
+                                    .padding(16.dp),
+                                    model = ImageRequest.Builder(context)
+                                        .data(item)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = "",
+                                    loading = {
+                                        Icon(
+                                            imageVector = Icons.Default.HourglassBottom, // Replace with your icon resource
+                                            contentDescription = "Create Group", // Replace with your string resource
+                                            modifier = Modifier.matchParentSize()
+                                        )
+                                    },
+                                    error = {
+                                        Icon(
+                                            imageVector = Icons.Default.BrokenImage, // Replace with your icon resource
+                                            contentDescription = "Create Group", // Replace with your string resource
+                                            modifier = Modifier.matchParentSize()
+                                        )
+                                    })
+
+                                if (selected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check, // Tick mark icon
+                                        contentDescription = "Selected",
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .align(Alignment.TopEnd)
+                                            .background(
+                                                MaterialTheme.colorScheme.secondary,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(4.dp),
+                                        tint = MaterialTheme.colorScheme.onSecondary
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+
+
+            }
+            Box(
+                modifier = Modifier.align(Alignment.BottomCenter)
+                    .background( brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background),
+                        endY = 50f
+                    ))
+            ) {
+                FilledIconButton(
+                    onClick = {
+                        createGroupViewModel.createGroup(groupName = groupName,
+                            groupImage = selectedImage,
+                            onSuccess = {
+                                navController.popBackStack()
+                            })
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+
+
+                ) {
+                    Text(text = "Create Group")
+                }
             }
 
-            Button(
-                onClick = { createGroupViewModel.createGroup( groupName=groupName,groupImage=selectedImage,
-                    onSuccess = {
-                        navController.popBackStack()
-                    }) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp,vertical = 24.dp)
-            ) {
-                Text(text = "Create Group")
+
+            if(uiState.showLoader) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
+                    CircularProgressIndicator(
+                        Modifier
+                            .size(64.dp)
+                            .align(Alignment.Center),
+                        strokeWidth =8.dp )
+                }
             }
         }
+
+
 
     }
 
