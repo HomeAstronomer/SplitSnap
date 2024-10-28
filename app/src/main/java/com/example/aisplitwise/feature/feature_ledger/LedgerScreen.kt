@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.LocationOn
@@ -33,7 +32,6 @@ import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,9 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.aisplitwise.data.local.Expense
 import com.example.aisplitwise.data.local.Member
-import com.example.aisplitwise.feature.feature_add_member.AddMemberDialog
 import com.example.aisplitwise.navigation.AddMemberDialogRoute
-import com.example.aisplitwise.navigation.JoinGroupDialogRoute
 import com.example.aisplitwise.uiCore.atoms.ImageCompose
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -214,7 +210,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
         val context= LocalContext.current
         Column(
@@ -228,7 +224,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.AttachMoney,
                     contentDescription = "Amount",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -236,14 +232,14 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "₹${expense.amount}",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -251,7 +247,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = expense.description,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -260,7 +256,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = "Paid by: ${expense.paidBy.displayName}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -269,7 +265,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = "Split among: ${expense.splitAmong.joinToString(", ") { it.displayName ?: "" }}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -286,7 +282,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
                     contentDescription = "Date",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -294,7 +290,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "Created at: $formattedDate",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
 
@@ -311,7 +307,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = "Date",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -319,7 +315,8 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "Location: ${expense.latitude}, ${expense.longitude}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+
                 )
             }
         }

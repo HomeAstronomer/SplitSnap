@@ -43,4 +43,6 @@
 
 1. Android Studio (latest version recommended)
 2. Firebase Project setup with Authentication and Firestore enabled.
-
+3. 
+4.
+http://material-foundation.github.io?primary=%234D59FE&colorMatch=false
