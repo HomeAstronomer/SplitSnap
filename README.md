@@ -44,5 +44,10 @@
 1. Android Studio (latest version recommended)
 2. Firebase Project setup with Authentication and Firestore enabled.
 3. 
-4.
+
+## Download the APK
+
+You can download the latest release of the app from the link below:
+
+[Download the app-release.apk](https://github.com/HomeAstronomer/AISplitwise/blob/master/release-apk/app-release.apk)
 http://material-foundation.github.io?primary=%234D59FE&colorMatch=false
