@@ -69,20 +69,10 @@ import com.google.firebase.vertexai.type.Schema
 import com.google.firebase.vertexai.type.content
 import com.google.firebase.vertexai.type.generationConfig
 import com.google.firebase.vertexai.vertexAI
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 val transactionSchema = Schema.obj(
     mapOf(
-        "sender" to Schema.obj(
-            mapOf(
-                "name" to Schema.string(),
-                "upiId" to Schema.string()
-            )
-        ),
+
+
         "receiver" to Schema.obj(
             mapOf(
                 "name" to Schema.string(),
@@ -91,6 +81,7 @@ val transactionSchema = Schema.obj(
         ),
         "amount" to Schema.double(),
         "time" to Schema.string("Iso Time"), // ISO 8601 format
+        "transactionId" to Schema.string(),
         "platform" to Schema.enumeration(listOf("GooglePay", "PhonePe", "Paytm", "Other"))
     )
 )
@@ -148,7 +139,7 @@ fun ImageAcceptorScreen(imageUri:String) {
         imageBitmap?.let { bitmap ->
             val prompt = content {
                 image(bitmap)
-                text("Extract Sender Name,Sender UPI Id ,Reciever Name ,Reciever UPI Id,Amount ,Time in iso")
+                text("Extract Reciever Name ,Reciever UPI Id,Amount ,TransactionId,Time in iso")
             }
             recognizedText=generativeModel.generateContent(prompt).text?:""
         }

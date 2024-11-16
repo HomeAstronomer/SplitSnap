@@ -14,8 +14,9 @@
   - Displays a list of groups the user has created or joined.
   - Provides access to detailed views for each group.
 
-- **Expenses** _(in progress)_:
+- **Expenses** :
   - Track and split group expenses easily.
+  - Extra feature to add Location Of expense
   - Sync data with Firebase for real-time updates.
 
 - **AI Feature** _(surprise)_:
@@ -34,8 +35,8 @@
 
 - [x] Login
 - [x] Dashboard
-- [ ] Expenses (in progress)
-- [ ] AI Feature (coming soon!)
+- [x] Expenses 
+- [x] AI Feature (integrating to Expense feature Pending)
 
 ## Getting Started
 
