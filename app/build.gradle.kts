@@ -121,10 +121,6 @@ dependencies {
 
     implementation(libs.gson)
 
-    implementation(libs.mlkit.text.recognition)
-
-
-
     implementation(libs.play.services.auth)
 
 

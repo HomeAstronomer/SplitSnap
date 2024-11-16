@@ -122,7 +122,6 @@ class AISplitwiseImageAcceptorActivity : ComponentActivity() {
                     color = Color.White.copy(alpha = 0.9f)
                 ) {
                      ImageAcceptorScreen(imageUri)
-                    LoadImageAndRecognizeText(imageUri){}
                 }
             }
         }
@@ -147,18 +146,11 @@ fun ImageAcceptorScreen(imageUri:String) {
         val result = (loader.execute(request) as? SuccessResult)?.drawable
         imageBitmap = drawableToBitmap(result)
         imageBitmap?.let { bitmap ->
-
             val prompt = content {
                 image(bitmap)
                 text("Extract Sender Name,Sender UPI Id ,Reciever Name ,Reciever UPI Id,Amount ,Time in iso")
             }
             recognizedText=generativeModel.generateContent(prompt).text?:""
-//            processImage(bitmap,onTextRecognized= { text ->
-//                recognizedText = text
-//                saveTextToScopedStorage(context,recognizedText,resultLauncher)
-//                saveRecognizedTextToFile(context,text)
-//            },
-//                error = {})
         }
     }
 
@@ -245,52 +237,6 @@ fun ImageAcceptorScreen(imageUri:String) {
             }
 
         }
-    }
-}
-
-private fun processImage(bitmap: Bitmap, onTextRecognized: (String) -> Unit,error:(Exception)->Unit) {
-    val image = InputImage.fromBitmap(bitmap, 0)
-
-    // Initialize Text Recognizer
-    val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-
-    // Process the image
-    recognizer.process(image)
-        .addOnSuccessListener { visionText ->
-            val recognizedText = visionText.text
-            Log.d("OCR", "Text Recognized: $recognizedText")
-            onTextRecognized(recognizedText)
-        }
-        .addOnFailureListener { e ->
-            Log.e("OCR", "Text recognition failed", e)
-            error.invoke(e)
-        }
-}
-
-@Composable
-fun LoadImageAndRecognizeText(imageUri: String, onTextRecognized: (String) -> Unit) {
-    val context = LocalContext.current
-    var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var recognizedText by remember { mutableStateOf("") }
-
-    // Load the image using Coil's ImageLoader
-    LaunchedEffect(imageUri) {
-        val loader = ImageLoader(context)
-        val request = ImageRequest.Builder(context)
-            .data(imageUri)
-            .build()
-
-        val result = (loader.execute(request) as? SuccessResult)?.drawable
-        imageBitmap = drawableToBitmap(result)
-    }
-
-    // Process the image once the bitmap is available
-    imageBitmap?.let { bitmap ->
-        processImage(bitmap,onTextRecognized= { text ->
-            recognizedText = text
-            onTextRecognized(text)
-        },
-            error = {})
     }
 }
 
