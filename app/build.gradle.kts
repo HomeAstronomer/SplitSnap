@@ -31,7 +31,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -120,10 +120,6 @@ dependencies {
     implementation(libs.lottie.compose)
 
     implementation(libs.gson)
-
-    implementation(libs.mlkit.text.recognition)
-
-
 
     implementation(libs.play.services.auth)
 

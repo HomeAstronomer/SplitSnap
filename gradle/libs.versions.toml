@@ -18,13 +18,12 @@ playServicesAuth = "21.2.0"
 room_version = "2.6.1"                     # Room
 serialization = "1.6.3"
 firebaseFirestoreKtx = "25.1.0"
-firebaseBom = "33.2.0"
+firebaseBom = "33.6.0"
 coil = "2.7.0"
 lottieCompose = "6.0.0"
 googleServices = "4.4.2"
 crashlyticsPlugin_Version = "3.0.2"
 playServicesLocation = "21.3.0"
-mlkitVersion = "16.0.0"
 
 # Kotlin Serialization
 
@@ -62,7 +61,6 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 
 # Navigation Libraries
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "nav_version" }
-mlkit_text_recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitVersion" }
 
 # Hilt Libraries
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -82,6 +80,8 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-storage = { module = "com.google.firebase:firebase-storage"}
+firebase-vertex={ module= "com.google.firebase:firebase-vertexai"}
+
 
 
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
@@ -92,7 +92,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 
 [bundles]
-firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth","firebase-storage"]
+firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth","firebase-storage","firebase-vertex"]
 # Plugin dependencies
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
