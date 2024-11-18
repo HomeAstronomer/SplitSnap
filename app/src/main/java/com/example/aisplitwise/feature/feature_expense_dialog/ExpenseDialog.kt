@@ -262,7 +262,9 @@ fun LocationButton(onLocationReceived: (latitude: Double, longitude: Double) -> 
                 )
                 .clip(CircleShape), onClick = {
                     if(!permissionGranted){
-                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)}
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+
+                    }
             }) {
             if (permissionGranted) {
                 Icon(
