@@ -18,7 +18,6 @@ import kotlinx.serialization.Serializable
 const val MEMBER_TABLE="member_table"
 @Keep
 @Parcelize
-@Serializable
 @Entity(tableName = MEMBER_TABLE)
 data class Member(
     @PrimaryKey

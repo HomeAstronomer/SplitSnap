@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,14 +50,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.aisplitwise.data.local.Expense
+import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.navigation.AddMemberDialogRoute
-import com.example.aisplitwise.uiCore.atoms.ImageCompose
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -79,123 +82,160 @@ fun LedgerScreen(
             navHostController.currentBackStackEntry?.savedStateHandle?.remove<Expense>("expenseKey")
         }
     }
+    LedgerScreenInternal(
+        navHostController::popBackStack,
+        navigateToExpenseDialog,
+        navHostController::navigate,
+        uiState.expense,
+        uiState.member,
+        uiState.group,
+        uiState.moneyStatus
+    )
 
-    Scaffold(modifier=Modifier.navigationBarsPadding(),topBar = { LedgerScreenHeader { navHostController.popBackStack() } }) { padding ->
-            LazyColumn(Modifier) {
-                item {
-                    Column (Modifier
+
+}
+
+@Composable
+fun LedgerScreenInternal(
+    popBackStack: () -> Unit,
+    navigateToExpenseDialog: (List<Member>) -> Unit,
+    navigate: (Any) -> Unit,
+    expense: List<Expense>,
+    member: Member?,
+    group: Group?,
+    moneyStatus: Pair<Double, Double>
+) {
+    Scaffold(
+        modifier = Modifier.navigationBarsPadding(),
+        topBar = { LedgerScreenHeader(group) { popBackStack() } }) { padding ->
+        LazyColumn(Modifier) {
+            item {
+                Column(
+                    Modifier
                         .padding(padding)
                         .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(horizontal = 24.dp, vertical = 16.dp)){
-                        Row(
-                            Modifier
-                                .padding(bottom=16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ImageCompose(
-                                Modifier
-                                    .size(64.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceContainer,
-                                        shape = CircleShape
-                                    )
-                                    .clip(CircleShape)
-                                    .padding(8.dp), data = uiState.group?.groupImg?:""
-                            )
-                            Column(
-                                Modifier
-                                    .padding(start = 16.dp)
-                                    .weight(1f)
-                            ) {
-                                Text(
-                                    text = "Group Name", style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    text = uiState.group?.name?:"", style = MaterialTheme.typography.titleLarge
-                                )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.AttachMoney,
-                                        contentDescription = "Amount",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-
-                                    Text(
-                                        text = "Members: ${uiState.group?.members?.joinToString(", ") { it.displayName ?: "" }}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 2
-                                    )
-                                }
-                            }
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedButton(
-                                onClick = {
-                                    navigateToExpenseDialog.invoke(uiState.group?.members?: emptyList())
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(end = 4.dp)
-                            ) {
-                                Row (
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceAround
-                                    ){
-                                    Text(text = "Add Expense")
-                                    Icon(
-                                        imageVector = Icons.Default.MonetizationOn,
-                                        contentDescription = "Add Expense",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                            OutlinedButton(
-                                onClick = {
-                                    navHostController.navigate(AddMemberDialogRoute(groupId =uiState.group?.id?:""))
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 4.dp),
-                            ) {
-                                Row(modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceAround) {
-                                    Text(text = "Add Member")
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = "Profile",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-                items(uiState.expense) { item ->
-                    val isMe by remember {
-                        mutableStateOf(item.paidBy.uid == uiState.member?.uid)
-                    }
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
-                        horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        ExpenseCard(expense = item, isMe)
+                        Column(modifier=Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Money You Owe",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "₹${moneyStatus.first}",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        VerticalDivider(Modifier.height(48.dp).padding(vertical=8.dp))
+                        Column(modifier=Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Money To Be Received",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "₹${moneyStatus.second}",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
+                            contentDescription = "Amount",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+
+                        Text(
+                            text = "Members: ${group?.members?.joinToString(", ") { it.displayName ?: "" }}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2
+                        )
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedButton(
+                            onClick = {
+                                navigateToExpenseDialog.invoke(group?.members ?: emptyList())
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Text(text = "Add Expense")
+                                Icon(
+                                    imageVector = Icons.Default.MonetizationOn,
+                                    contentDescription = "Add Expense",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                navigate(AddMemberDialogRoute(groupId = group?.id ?: ""))
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 4.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Text(text = "Add Member")
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Profile",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
                     }
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
             }
-        }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+            items(expense) { item ->
+                val isMe by remember {
+                    mutableStateOf(item.paidBy.uid == member?.uid)
+                }
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End
+                ) {
+                    ExpenseCard(expense = item, isMe)
+                }
+            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
+        }
+    }
 }
 
 @Composable
@@ -212,7 +252,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
-        val context= LocalContext.current
+        val context = LocalContext.current
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = if (isMe) Alignment.Start else Alignment.End // Align based on isMe
@@ -299,7 +339,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             // Created At
             Row(
                 modifier = Modifier.clickable {
-                    openLocationInMaps(context =context, expense.latitude, expense.longitude)
+                    openLocationInMaps(context = context, expense.latitude, expense.longitude)
                 },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End // Align date based on isMe
@@ -325,7 +365,9 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
 
 
 @Composable
-fun LedgerScreenHeader(backClick: () -> Unit) {
+fun LedgerScreenHeader(
+    group: Group?, backClick: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.primaryContainer)
@@ -345,8 +387,23 @@ fun LedgerScreenHeader(backClick: () -> Unit) {
                     .clickable {
                         backClick.invoke()
                     })
+//
+//            ImageCompose(
+//                Modifier
+//                    .size(24.dp)
+//                    .background(
+//                        MaterialTheme.colorScheme.surfaceContainer,
+//                        shape = CircleShape
+//                    )
+//
+//                    .clip(CircleShape)
+//                    .padding(8.dp), data = group?.groupImg?:""
+//            )
+
             Text(
-                text = "Expenses", style = MaterialTheme.typography.headlineSmall
+                modifier = Modifier
+                    .padding(start = 16.dp),
+                text = group?.name ?: "", style = MaterialTheme.typography.titleLarge
             )
         }
     }
@@ -365,4 +422,40 @@ fun openLocationInMaps(context: Context, latitude: Double, longitude: Double) {
     } else {
         Toast.makeText(context, "Google Maps not installed", Toast.LENGTH_SHORT).show()
     }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun LedgerScreenInternalPreview() {
+    val dummyMember = Member(uid = "user1", displayName = "John Doe")
+    val dummyGroup = Group(id = "group1", name = "Trip to Hawaii")
+    val dummyExpenses = listOf(
+        Expense(
+            id = "1",
+            description = "Groceries",
+            amount = 55.25,
+            paidBy = dummyMember,
+            splitAmong = listOf(dummyMember),
+            groupId = dummyGroup.id
+        ),
+        Expense(
+            id = "2",
+            description = "Fuel",
+            amount = 60.00,
+            paidBy = dummyMember,
+            splitAmong = listOf(dummyMember),
+            groupId = dummyGroup.id
+        )
+    )
+
+    LedgerScreenInternal(
+        popBackStack = {},
+        navigateToExpenseDialog = {},
+        navigate = {},
+        expense = dummyExpenses,
+        member = dummyMember,
+        group = dummyGroup,
+        moneyStatus = Pair(50.25, 235435.00)
+    )
 }
