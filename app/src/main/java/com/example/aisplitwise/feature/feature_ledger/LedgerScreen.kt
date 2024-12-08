@@ -123,7 +123,7 @@ fun LedgerScreenInternal(
                         Column(modifier=Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Money You Owe",
+                                text = "To Pay",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 textAlign = TextAlign.Center
@@ -135,11 +135,11 @@ fun LedgerScreenInternal(
                                 textAlign = TextAlign.Center
                             )
                         }
-                        VerticalDivider(Modifier.height(48.dp).padding(vertical=8.dp))
+                        VerticalDivider(Modifier.height(48.dp).padding(vertical=8.dp), thickness = 1.dp)
                         Column(modifier=Modifier.weight(1f),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Money To Be Received",
+                                text =  "To Receive",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.error,
                                 textAlign = TextAlign.Center
