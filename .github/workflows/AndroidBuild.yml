@@ -15,10 +15,14 @@ jobs:
       - name : Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Write google-services.json from GitHub Secrets
-        run: echo "SERVICE_JSON" > app/google-services.json
+
+      - name: Set up Google services JSON
+        run: echo "$SERVICE_JSON" > $GITHUB_WORKSPACE/app/google-services.json
         env:
           SERVICE_JSON: ${{ secrets.SERVICE_JSON }}
+
+      - name: Debug Google services JSON
+        run: cat $GITHUB_WORKSPACE/app/google-services.json
 
       - name: Set execute permission for gradlew
         run: chmod +x ./gradlew
