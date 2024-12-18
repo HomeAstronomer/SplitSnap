@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - master
-  push:
-    branches:
-      - master
-      - feature-AI-Image-Recogniser
 
 jobs:
   build:
@@ -56,5 +52,5 @@ jobs:
       - name: Upload Release APK
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: CICD-Release.apk
+          name: AISplitWise-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
