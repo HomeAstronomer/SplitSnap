@@ -10,6 +10,12 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    buildCache {
+        local {
+            directory = file("${rootDir}/.gradle/build-cache") // Local cache directory
+            isEnabled = true // Enable the local build cache
+        }
+    }
 }
 
 dependencyResolutionManagement {
