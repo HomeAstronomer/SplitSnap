@@ -8,39 +8,53 @@ on:
     branches:
       - master
       - feature-AI-Image-Recogniser
+
 jobs:
   build:
-    runs-on:  ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
-      - name : Checkout
+      # Step 1: Checkout the code
+      - name: Checkout
         uses: actions/checkout@v4.2.2
 
-
+      # Step 2: Set up Google services JSON
       - name: Set up Google services JSON
         run: echo "$SERVICE_JSON" > $GITHUB_WORKSPACE/app/google-services.json
         env:
           SERVICE_JSON: ${{ secrets.SERVICE_JSON }}
 
+      # Step 3: Debug Google services JSON
       - name: Debug Google services JSON
         run: cat $GITHUB_WORKSPACE/app/google-services.json
 
+      # Step 4: Set execute permission for gradlew
       - name: Set execute permission for gradlew
         run: chmod +x ./gradlew
 
+      # Step 5: Set up Java JDK
       - name: Setup Java JDK
         uses: actions/setup-java@v4.5.0
         with:
           distribution: 'temurin' # You can also use 'zulu', 'adopt', etc.
-          java-version: '17.0.2+8'
+          java-version: '17'
 
-      - name: Build with Gradle
-        run : ./gradlew build
+      # Step 6: Decrypt and set up the release keystore
+      - name: Decrypt release keystore
+        run: |
+          mkdir -p $HOME/.android
+          echo "${{ secrets.MY_RELEASE_BASE_64 }}" | base64 --decode > $HOME/.android/release.keystore
 
-      - name: Upload a Build Artifact
+      # Step 7: Build the release APK
+      - name: Build Release APK
+        run: |
+          ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$HOME/.android/release.keystore \
+            -Pandroid.injected.signing.store.password=${{ secrets.RELEASE_KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.RELEASE_KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.RELEASE_KEY_PASSWORD }}
+
+      # Step 8: Upload the release APK as a build artifact
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: CICD.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-
-
-
+          name: CICD-Release.apk
+          path: app/build/outputs/apk/release/app-release.apk
