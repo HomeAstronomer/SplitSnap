@@ -24,17 +24,19 @@ jobs:
         run: cat $GITHUB_WORKSPACE/app/google-services.json
 
      # Step 5: Cache Gradle Build Cache
-      - name: Cache Gradle build cache
-        uses: actions/cache@v3
-        with:
-         path: ~/.gradle/build-cache
-         key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-         restore-keys: |
-           ${{ runner.os }}-build-cache-
+
 
       # Step 4: Set execute permission for gradlew
       - name: Set execute permission for gradlew
         run: chmod +x ./gradlew
+
+      - name: Cache Gradle build cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/build-cache
+          key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-
 
 
 
