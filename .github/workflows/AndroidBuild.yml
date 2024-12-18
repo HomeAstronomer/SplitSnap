@@ -68,10 +68,4 @@ jobs:
           name: AISplitWise-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
 
-      - name: Cache Gradle build cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-build-cache-
+
