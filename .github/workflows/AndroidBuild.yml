@@ -19,7 +19,7 @@ jobs:
         env:
           SERVICE_JSON: ${{ secrets.SERVICE_JSON }}
 
-      # Step 3: Debug Google services JSON
+      # Step 3: Debug Google services JSONN
       - name: Debug Google services JSON
         run: cat $GITHUB_WORKSPACE/app/google-services.json
 
