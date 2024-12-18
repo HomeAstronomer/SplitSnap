@@ -33,7 +33,7 @@ jobs:
       - name: Cache Gradle build cache
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/build-cache
+          path: ~/.gradle/caches
           key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-build-cache-
@@ -71,7 +71,7 @@ jobs:
       - name: Cache Gradle build cache
         uses: actions/cache@v3
         with:
-          path: ~/.gradle/build-cache
+          path: ~/.gradle/caches
           key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-build-cache-
