@@ -71,7 +71,7 @@ jobs:
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: aisplitwise
+          appId: 1:435713973615:android:cc57667b96c406d44c5c9a
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_AUTH_KEY }}
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
