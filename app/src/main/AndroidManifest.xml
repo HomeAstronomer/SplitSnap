@@ -36,7 +36,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,6 +44,7 @@
 
                 <!-- Specify your URL pattern here -->
                 <data
+
                     android:scheme="https"
                     android:host="com.example.aisplitwise"
                     android:pathPrefix="/joinGroup" />

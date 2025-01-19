@@ -1,5 +1,14 @@
 package com.example.aisplitwise.feature.dashboard
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationUserState
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,8 +30,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Replay
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,8 +42,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -103,6 +119,33 @@ fun DashBoardContent(
     groupList: List<Group> = emptyList(),
     navigateGroup: (String) -> Unit,
 ) {
+    val context=LocalContext.current
+    var showApplinkDialog = remember{ mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if(Build.VERSION.SDK_INT>=31) {
+            val manager = context.getSystemService(DomainVerificationManager::class.java)
+            val userState = manager.getDomainVerificationUserState(context.packageName)
+
+// Domains that have passed Android App Links verification.
+            val verifiedDomains = userState?.hostToStateMap
+                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED }
+
+// Domains that haven't passed Android App Links verification but that the user
+// has associated with an app.
+            val selectedDomains = userState?.hostToStateMap
+                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_SELECTED }
+
+// All other domains.
+            val unapprovedDomains = userState?.hostToStateMap
+                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
+            if(unapprovedDomains?.isNotEmpty()==true){
+                showApplinkDialog.value=true
+
+            }
+            Log.i("AppLinks","verifiedDomains:- $verifiedDomains \nselectedDomains: $selectedDomains \nunapprovedDomain:- $unapprovedDomains ")
+        }
+    }
     Box(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             LazyColumn {
@@ -141,6 +184,46 @@ fun DashBoardContent(
 
 
         }
+    }
+    AnimatedVisibility(showApplinkDialog.value) {
+        AlertDialog(
+            icon = {
+                Icon(Icons.Default.SettingsSuggest, contentDescription = "Example Icon")
+            },
+            title = {
+                Text(text = "Enable Link Opening by Default")
+            },
+            text = {
+                Text(text = "To provide a seamless experience, please allow this app to open links automatically from your system settings. After that, click on 'Add Link' to set the default")
+            },
+            onDismissRequest = {
+                showApplinkDialog.value = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val intent = Intent(
+                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                            Uri.parse("package:${context.packageName}")
+                        )
+                        context.startActivity(intent)
+
+                        showApplinkDialog.value=false
+                    }
+                ) {
+                    Text("Go to Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showApplinkDialog.value = false
+                    }
+                ) {
+                    Text("Dismiss")
+                }
+            }
+        )
     }
 
 }
