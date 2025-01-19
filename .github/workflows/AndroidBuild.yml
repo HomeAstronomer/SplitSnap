@@ -1,7 +1,7 @@
 name: AndroidBuild
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
@@ -23,9 +23,22 @@ jobs:
       - name: Debug Google services JSON
         run: cat $GITHUB_WORKSPACE/app/google-services.json
 
+     # Step 5: Cache Gradle Build Cache
+
+
       # Step 4: Set execute permission for gradlew
       - name: Set execute permission for gradlew
         run: chmod +x ./gradlew
+
+      - name: Cache Gradle build cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle
+          key: ${{ runner.os }}-build-cache-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-build-cache-
+
+
 
       # Step 5: Set up Java JDK
       - name: Setup Java JDK
@@ -54,3 +67,5 @@ jobs:
         with:
           name: AISplitWise-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
+
+
