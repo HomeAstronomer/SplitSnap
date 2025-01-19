@@ -15,7 +15,7 @@ jobs:
 
       - name: Get all commit messages
         id: commit_messages
-        run: echo "::set-output name=messages::$(git log --pretty=format:"%s" HEAD...HEAD~10)"
+        run: echo "::set-output name=messages::$(git log --pretty=format:'%s')"
         shell: bash
 
       # Step 2: Set up Google services JSON
