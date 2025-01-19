@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -50,7 +51,9 @@ class JoinGroupDialogViewModel @Inject constructor(
                     _uiState.update { it.copy(showLoader = false) }
                     when (dataState) {
                         is DataState.Success -> {
-                            onSuccess()
+                            withContext(Dispatchers.Main) {
+                                onSuccess()
+                            }
                         }
 
                         is DataState.Error -> {
