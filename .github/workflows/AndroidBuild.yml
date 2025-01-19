@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
+      - name: Get all commit messages
+        id: commit_messages
+        run: echo "::set-output name=messages::$(git log --pretty=format:"%s" HEAD...HEAD~10)"
+        shell: bash
+
       # Step 2: Set up Google services JSON
       - name: Set up Google services JSON
         run: echo "$SERVICE_JSON" > $GITHUB_WORKSPACE/app/google-services.json
@@ -75,4 +80,6 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_AUTH_KEY }}
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
+          releaseNotes: |
+            ${{ steps.commit_messages.outputs.messages }}
 
