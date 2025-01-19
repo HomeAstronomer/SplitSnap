@@ -16,3 +16,7 @@
 local.properties
 /my-release-key.jks
 /.idea/appInsightsSettings.xml
+/my-release-key.jks.base64
+/.idea/runConfigurations.xml
+.idea/
+
