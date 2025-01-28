@@ -24,6 +24,8 @@ lottieCompose = "6.0.0"
 googleServices = "4.4.2"
 crashlyticsPlugin_Version = "3.0.2"
 playServicesLocation = "21.3.0"
+maps-compose = "4.4.1"
+
 
 # Kotlin Serialization
 

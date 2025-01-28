@@ -28,12 +28,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -60,6 +62,7 @@ import com.example.aisplitwise.data.local.Expense
 import com.example.aisplitwise.data.local.Group
 import com.example.aisplitwise.data.local.Member
 import com.example.aisplitwise.navigation.AddMemberDialogRoute
+import com.example.aisplitwise.navigation.HeatMapRoute
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -214,6 +217,15 @@ fun LedgerScreenInternal(
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
+                        }
+
+                        IconButton(onClick = {navigate(HeatMapRoute(group?.id?:""))}) {
+                            Icon(
+                                imageVector = Icons.Default.Map,
+                                contentDescription = "Profile",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }

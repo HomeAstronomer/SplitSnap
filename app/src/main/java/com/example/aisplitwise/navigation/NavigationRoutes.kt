@@ -27,3 +27,6 @@ data class AddMemberDialogRoute(val groupId:String="")
 
 @Serializable
 data class JoinGroupDialogRoute(val groupId:String="")
+
+@Serializable
+data class HeatMapRoute(val groupId:String="")
