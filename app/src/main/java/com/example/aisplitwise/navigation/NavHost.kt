@@ -18,6 +18,7 @@ import com.example.aisplitwise.feature.feature_add_member.AddMemberDialog
 import com.example.aisplitwise.feature.feature_create_group.CreateGroupScreen
 import com.example.aisplitwise.feature.feature_expense_dialog.ExpenseDialog
 import com.example.aisplitwise.feature.feature_expense_dialog.ExpenseDialogViewModel
+import com.example.aisplitwise.feature.feature_heatMap.HeatMapScreen
 import com.example.aisplitwise.feature.feature_joinGroup.JoinGroupDialog
 import com.example.aisplitwise.feature.feature_ledger.LedgerScreen
 import com.example.aisplitwise.feature.feature_login.LoginScreen
@@ -103,6 +104,15 @@ fun NavHostInitializer(navController: NavHostController) {
                 expenseViewModel = hiltViewModel<ExpenseDialogViewModel>(),
                 members= navController.previousBackStackEntry?.savedStateHandle?.get<List<Member>>("Members_Key")?: emptyList()
             )
+        }
+
+        composable<HeatMapRoute>(
+            enterTransition = { slideInOutTransition(slideDirection = SlideDirection.RightToLeft).first() },
+            exitTransition = { fadeOut(tween(300,100)) },
+            popExitTransition = { slideInOutTransition(slideDirection = SlideDirection.LeftToRight).second() },
+            popEnterTransition =  { fadeIn() },
+        ) {
+            HeatMapScreen()
         }
         dialog<AddMemberDialogRoute>(dialogProperties = DialogProperties(usePlatformDefaultWidth = false)) {
 

@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.kotlin.compose)
 
+
     id ("kotlin-parcelize")
 
 }
@@ -15,15 +16,17 @@ plugins {
 
 android {
     namespace = "com.example.aisplitwise"
-    compileSdk = 34
+    compileSdk = 35
 
 
     defaultConfig {
         applicationId = "com.example.aisplitwise"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        val mapsApiKey: String = System.getenv("MAPS_API_KEY") ?: ""
+        resValue("string", "maps_api_key", mapsApiKey)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -126,5 +129,6 @@ dependencies {
 
     implementation(libs.play.services.auth)
 
+    implementation(libs.bundles.maps)
 
 }
