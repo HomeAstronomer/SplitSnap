@@ -83,6 +83,12 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-storage = { module = "com.google.firebase:firebase-storage"}
 firebase-vertex={ module= "com.google.firebase:firebase-vertexai"}
+firebase-messaging={ module= "com.google.firebase:firebase-messaging"}
+
+
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "maps-compose" }
+maps-compose-widgets = { group = "com.google.maps.android", name = "maps-compose-widgets", version.ref = "maps-compose" }
 
 
 
@@ -94,7 +100,9 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 
 [bundles]
-firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth","firebase-storage","firebase-vertex"]
+firebase = ["firebase-bom", "firebase-analytics", "firebase-crashlytics", "firebase-auth","firebase-storage","firebase-vertex","firebase-messaging"]
+maps = ["maps-compose", "maps-compose-utils", "maps-compose-widgets"]
+
 # Plugin dependencies
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
