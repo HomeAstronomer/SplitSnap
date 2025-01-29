@@ -18,10 +18,8 @@ jobs:
         run: echo "::set-output name=messages::$(git log --pretty=format:'%s')"
         shell: bash
 
-      - name: Set Environment Variable
-        env:
-          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
-        run: echo "MAPS_API_KEY=$MAPS_API_KEY"
+      - name: Set MAPS_API_KEY Environment Variable
+        run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> $GITHUB_ENV
       # Step 2: Set up Google services JSON
       - name: Set up Google services JSON
         run: echo "$SERVICE_JSON" > $GITHUB_WORKSPACE/app/google-services.json
@@ -65,11 +63,14 @@ jobs:
 
       # Step 7: Build the release APK
       - name: Build Release APK
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
         run: |
           ./gradlew assembleRelease -Pandroid.injected.signing.store.file=$HOME/.android/release.keystore \
             -Pandroid.injected.signing.store.password=${{ secrets.RELEASE_KEYSTORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.RELEASE_KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.RELEASE_KEY_PASSWORD }}
+            -Pandroid.injected.signing.key.password=${{ secrets.RELEASE_KEY_PASSWORD }} \
+            -PMAPS_API_KEY=$MAPS_API_KEY
 
       # Step 8: Upload the release APK as a build artifact
       - name: Upload Release APK
