@@ -27,6 +27,7 @@ android {
         versionName = "1.0"
         val mapsApiKey: String = System.getenv("MAPS_API_KEY") ?: ""
         resValue("string", "maps_api_key", mapsApiKey)
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
