@@ -18,12 +18,7 @@ jobs:
         run: echo "::set-output name=messages::$(git log --pretty=format:'%s')"
         shell: bash
 
-      - name: Debug Gradle Property
-        run: |
-          echo "Checking MAPS_API_KEY in Gradle..."
-          ./gradlew -q properties | grep MAPS_API_KEY || echo "MAPS_API_KEY not set"
-        env:
-          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+
 
       - name: Set MAPS_API_KEY Environment Variable
         run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> $GITHUB_ENV
@@ -85,6 +80,13 @@ jobs:
         with:
           name: AISplitWise-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Debug Gradle Property
+        run: |
+          echo "Checking MAPS_API_KEY in Gradle..."
+          ./gradlew -q properties | grep MAPS_API_KEY || echo "MAPS_API_KEY not set"
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
