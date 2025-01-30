@@ -13,7 +13,7 @@ plugins {
 
 }
 val mapsApiKey = project.findProperty("MAPS_API_KEY") ?: "NOT SET"
-println("🔍 MAPS_API_KEY in Gradle: $mapsApiKey")
+println("MAPS_API_KEY: " + mapsApiKey.toString().take(5) + "*****")
 
 android {
     namespace = "com.example.aisplitwise"
