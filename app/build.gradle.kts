@@ -12,7 +12,8 @@ plugins {
     id ("kotlin-parcelize")
 
 }
-
+val mapsApiKey = project.findProperty("MAPS_API_KEY") ?: "NOT SET"
+println("🔍 MAPS_API_KEY in Gradle: $mapsApiKey")
 
 android {
     namespace = "com.example.aisplitwise"
@@ -25,9 +26,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        val mapsApiKey: String = System.getenv("MAPS_API_KEY") ?: ""
-        resValue("string", "maps_api_key", mapsApiKey)
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

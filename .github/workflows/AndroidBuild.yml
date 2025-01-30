@@ -18,6 +18,13 @@ jobs:
         run: echo "::set-output name=messages::$(git log --pretty=format:'%s')"
         shell: bash
 
+      - name: Debug Gradle Property
+        run: |
+          echo "Checking MAPS_API_KEY in Gradle..."
+          ./gradlew -q properties | grep MAPS_API_KEY || echo "MAPS_API_KEY not set"
+        env:
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+
       - name: Set MAPS_API_KEY Environment Variable
         run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" >> $GITHUB_ENV
       # Step 2: Set up Google services JSON
