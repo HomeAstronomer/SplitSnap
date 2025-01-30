@@ -13,11 +13,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      - name: Get all commit messages
+      - name: Get PR Titles Merged into Main
+        id: pr_titles
+        run: |
+          PR_TITLES=$(gh pr list --state merged --base main --json title --jq '.[].title' | tr '\n' '; ')
+          echo "PR_TITLES=$PR_TITLES" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Commit Messages (Including Merges)
         id: commit_messages
-        run: echo "::set-output name=messages::$(git log --pretty=format:'%s')"
-        shell: bash
-        
+        run: |
+          COMMIT_MSGS=$(git log --merges -n 10 --pretty=format:'%s' | tr '\n' '; ')
+          echo "COMMIT_MSGS=$COMMIT_MSGS" >> $GITHUB_ENV
+
+      - name: Combine Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES="🔹 PR Titles: $PR_TITLES\n🔹 Commit Messages: $COMMIT_MSGS"
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo -e "$RELEASE_NOTES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV      
+
       # Step 2: Set up Google services JSON
       - name: Set up Google services JSON
         run: echo "$SERVICE_JSON" > $GITHUB_WORKSPACE/app/google-services.json
@@ -86,5 +103,4 @@ jobs:
           groups: testers
           file: app/build/outputs/apk/release/app-release.apk
           releaseNotes: |
-            ${{ steps.commit_messages.outputs.messages }}
-
+            releaseNotes: ${{ env.RELEASE_NOTES }}
