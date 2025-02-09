@@ -16,9 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.aisplitwise.navigation.NavHostInitializer
 import com.example.aisplitwise.ui.theme.AISplitwiseTheme
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import org.intellij.lang.annotations.Language
 
@@ -29,12 +32,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
+
             val navController = rememberNavController()
+            val isLoggedIn= Firebase.auth.currentUser
 
-
+            installSplashScreen().apply {
+                setKeepOnScreenCondition {
+                    false
+                }
+            }
 
             AISplitwiseTheme {
-                NavHostInitializer(navController)
+                NavHostInitializer(navController, isLoggedIn)
             }
 
         }

@@ -24,10 +24,14 @@ import com.example.aisplitwise.feature.feature_ledger.LedgerScreen
 import com.example.aisplitwise.feature.feature_login.LoginScreen
 import com.example.aisplitwise.feature.feature_signup.SignUpScreen
 import com.example.aisplitwise.feature.feature_splash.SplashScreen
+import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun NavHostInitializer(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = SplashRoute) {
+fun NavHostInitializer(navController: NavHostController, isLoggedIn: FirebaseUser?) {
+    NavHost(navController = navController, startDestination = if(isLoggedIn!=null){
+        DashBoardRoute
+    }else{
+        LoginScreenRoute}) {
         composable<SplashRoute>(
             enterTransition = { slideInOutTransition(slideDirection = SlideDirection.RightToLeft).first() },
             exitTransition = { fadeOut(tween(300,100)) },

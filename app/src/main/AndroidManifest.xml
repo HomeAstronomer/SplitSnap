@@ -19,7 +19,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/logo_svg"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AISplitwise"
         android:name=".SplitWiseApplication"

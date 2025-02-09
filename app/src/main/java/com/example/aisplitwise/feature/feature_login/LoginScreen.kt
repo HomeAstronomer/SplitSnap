@@ -7,11 +7,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.PersonAdd
@@ -32,12 +40,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RadialGradient
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -199,11 +216,37 @@ Scaffold(modifier=Modifier.imePadding().background(MaterialTheme.colorScheme.bac
             modifier = Modifier.padding(vertical = 24.dp)
         )
 
+        val infiniteTransition = rememberInfiniteTransition(label = "background")
+
+        val showLoader=remember { mutableStateOf(false) }
+        val targetOffset = with(LocalDensity.current) {
+            1000.dp.toPx()
+        }
+        val offset by infiniteTransition.animateFloat(
+            initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
+                tween(5000, easing = LinearEasing), repeatMode = RepeatMode.Restart
+            ), label = "offset"
+        )
+        val brushColors = listOf(
+            Color(0xFF4285F4),  // Google Blue
+            Color(0xFFEA4335),  // Google Red
+            Color(0xFFFBBC05),  // Google Yellow
+            Color(0xFF34A853)   // Google Green
+        )
         OutlinedButton(
             onClick = {
-               signInWithGoogle(oneTapClient,signInRequest,launcher)
+               signInWithGoogle(oneTapClient,signInRequest,launcher){
+                    showLoader.value=it
+               }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+            .then(if (showLoader.value)Modifier.fillMaxWidth().border(2.dp, brush = Brush.linearGradient(
+                colors = brushColors,
+                start = Offset(offset, offset),
+                end = Offset(offset + 1000f, offset + 1000f),
+                tileMode = TileMode.Repeated
+            ) , shape = RoundedCornerShape(24.dp)) else Modifier.padding(2.dp)),
             enabled = true
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -251,9 +294,12 @@ fun signInWithGoogle(
     oneTapClient: SignInClient,
     signInRequest: BeginSignInRequest,
     launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
+    showLoader:(Boolean)->Unit
 ) {
+    showLoader.invoke(true)
     oneTapClient.beginSignIn(signInRequest)
         .addOnSuccessListener { result ->
+            showLoader.invoke(false)
             try {
                 val intentSenderRequest = IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
                 launcher.launch(intentSenderRequest)  // Start the One Tap sign-in UI
@@ -262,13 +308,46 @@ fun signInWithGoogle(
             }
         }
         .addOnFailureListener { e ->
+            showLoader.invoke(false)
             Log.e("SignIn", "One Tap sign-in failed: ${e.localizedMessage}")
         }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
-    val navController= rememberNavController()
-    LoginScreen(hiltViewModel(), navController)
+fun RotatingSweepGradientBorderBox(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    // Animate the rotation angle
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    // Animated Sweep Gradient Brush
+    val animatedBrush = Brush.sweepGradient(
+        colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Red)
+    )
+
+    Box(
+        modifier = modifier
+            .size(150.dp)
+            .graphicsLayer {
+                rotationZ = rotationAngle  // Rotates the entire border
+            }
+            .border(4.dp, animatedBrush, shape = RoundedCornerShape(24.dp)), // Apply animated brush to border
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Rotating Border", color = Color.White, fontSize = 16.sp)
+    }
 }
+
+@Preview
+@Composable
+fun PreviewRotatingSweepGradientBorderBox() {
+    RotatingSweepGradientBorderBox()
+}
+
