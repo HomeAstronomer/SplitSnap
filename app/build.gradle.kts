@@ -128,4 +128,6 @@ dependencies {
 
     implementation(libs.bundles.maps)
 
+    implementation(libs.core.splashscreen)
+
 }

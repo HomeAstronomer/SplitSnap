@@ -25,6 +25,7 @@ googleServices = "4.4.2"
 crashlyticsPlugin_Version = "3.0.2"
 playServicesLocation = "21.3.0"
 maps-compose = "4.4.1"
+core-splashscreen="1.0.1"
 
 
 # Kotlin Serialization
@@ -75,6 +76,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room_version" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room_version" }
 androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room_version" }
+core-splashscreen={group= "androidx.core",name="core-splashscreen",version.ref="core-splashscreen"}
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
