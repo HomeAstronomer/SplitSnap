@@ -14,39 +14,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.imageLoader
 import coil.request.ImageRequest
-
+import com.example.aisplitwise.R
 @Composable
 fun ImageCompose(modifier: Modifier=Modifier,
                  data:Any="",
-                 loadingImg:ImageVector= Icons.Default.HourglassBottom,
-                 errorImg:ImageVector= Icons.Default.BrokenImage,
-                 iconPadding:PaddingValues= PaddingValues(8.dp)
+                 loadingImg:Int= R.drawable.ic_hourglass_bottom,
+                 errorImg:Int=R.drawable.ic_broken_image,
 ){
-    val context= LocalContext.current
-    SubcomposeAsyncImage(modifier = modifier,
-        model = ImageRequest.Builder(context)
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
             .data(data)
             .crossfade(true)
+            .crossfade(400)
+            .placeholder(loadingImg)
+            .error(errorImg)
             .build(),
         contentDescription = "",
-        loading = {
-            Icon(
-                imageVector = loadingImg, // Replace with your icon resource
-                contentDescription = "Loading Icon", // Replace with your string resource
-                modifier = Modifier.matchParentSize().padding(iconPadding)
-            )
-        },
-        error = {
-            Icon(
-                imageVector = errorImg, // Replace with your icon resource
-                contentDescription = "Create Group", // Replace with your string resource
-                modifier = Modifier.matchParentSize().padding(iconPadding)
-            )
-        })
+        contentScale = ContentScale.Crop,
+        modifier =modifier
+    )
+
 }

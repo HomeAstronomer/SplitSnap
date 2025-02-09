@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.example.aisplitwise.uiCore.atoms.ImageCompose
 
 @Composable
 fun  CreateGroupScreen(
@@ -139,29 +140,11 @@ fun  CreateGroupScreen(
                                         shape = RoundedCornerShape(16.dp)
                                     )
                             ) {
-                                SubcomposeAsyncImage(modifier = Modifier
+                                ImageCompose(modifier = Modifier
                                     .matchParentSize()
                                     .align(Alignment.Center)
                                     .padding(16.dp),
-                                    model = ImageRequest.Builder(context)
-                                        .data(item)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = "",
-                                    loading = {
-                                        Icon(
-                                            imageVector = Icons.Default.HourglassBottom, // Replace with your icon resource
-                                            contentDescription = "Create Group", // Replace with your string resource
-                                            modifier = Modifier.matchParentSize()
-                                        )
-                                    },
-                                    error = {
-                                        Icon(
-                                            imageVector = Icons.Default.BrokenImage, // Replace with your icon resource
-                                            contentDescription = "Create Group", // Replace with your string resource
-                                            modifier = Modifier.matchParentSize()
-                                        )
-                                    })
+                                   data=item)
 
                                 if (selected) {
                                     Icon(
