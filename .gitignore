@@ -19,5 +19,4 @@ local.properties
 /my-release-key.jks.base64
 /.idea/runConfigurations.xml
 .idea/
-.gradle.properties
 
