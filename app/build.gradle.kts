@@ -18,10 +18,12 @@ plugins {
 android {
     signingConfigs {
         create("debugg") {
-            storeFile = file(project.property("debugKeystore").toString())
-            storePassword = project.property("debugKeystorePassword").toString()
-            keyAlias = project.property("debugKeyAlias").toString()
-            keyPassword = project.property("debugKeyPassword").toString()
+            if (project.hasProperty("debugKeystore")) {
+                storeFile = file(project.property("debugKeystore").toString())
+                storePassword = project.property("debugKeystorePassword").toString()
+                keyAlias = project.property("debugKeyAlias").toString()
+                keyPassword = project.property("debugKeyPassword").toString()
+            }
         }
     }
     namespace = "com.splitsnap"
