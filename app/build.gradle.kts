@@ -16,6 +16,8 @@ plugins {
 }
 
 android {
+    project.extensions.extraProperties["android.useAndroidX"] = true
+
     signingConfigs {
         create("debugg") {
             if (project.hasProperty("debugKeystore")) {
@@ -31,6 +33,7 @@ android {
 
 
     defaultConfig {
+
         applicationId = "com.splitsnap"
         minSdk = 24
         targetSdk = 35
