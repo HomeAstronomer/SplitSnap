@@ -12,3 +12,5 @@ plugins {
 
 
 }
+
+rootProject.extensions.extraProperties["android.useAndroidX"] = true

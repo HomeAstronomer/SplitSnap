@@ -16,7 +16,6 @@ plugins {
 }
 
 android {
-    project.extensions.extraProperties["android.useAndroidX"] = true
 
     signingConfigs {
         create("debugg") {
