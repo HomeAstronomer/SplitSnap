@@ -10,8 +10,65 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the code
-      - name: Checkout
-        uses: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensures we get full history
+
+      - name: Restore last PR ID from cache
+        id: restore-cache
+        uses: actions/cache@v3
+        with:
+          path: last_pr_id.txt
+          key: last-pr-id
+
+      - name: Get last processed PR ID
+        id: get_last_pr
+        run: |
+          if [ -f last_pr_id.txt ]; then
+            LAST_PR_ID=$(cat last_pr_id.txt)
+          else
+            LAST_PR_ID=0  # Default to 0 if no previous PR is found
+          fi
+          echo "LAST_PR_ID=$LAST_PR_ID" >> $GITHUB_ENV
+
+      - name: Get all merged PRs since last recorded PR
+        id: get_prs
+        run: |
+          # Get all merged PRs sorted by date
+          PRS=$(git log --merges --pretty=format:"%H %s" | grep -oE 'Merge pull request #[0-9]+' | awk '{print $4}')
+          
+          NEWEST_PR=0
+          MERGED_PRS=""
+          
+          for PR in $PRS; do
+            if [ "$PR" -gt "$LAST_PR_ID" ]; then
+              MERGED_PRS+="PR #$PR: $(git log --merges --grep="Merge pull request #$PR" --pretty=format:"%s" | sed 's/Merge pull request #[0-9]* from .* //')"$'\n'
+              NEWEST_PR=$PR
+            fi
+          done
+          
+          echo -e "Merged PRs since last run:\n$MERGED_PRS"
+          
+          # Save merged PRs as an environment variable for later use
+          echo "MERGED_PRS<<EOF" >> $GITHUB_ENV
+          echo "$MERGED_PRS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+          # Save the latest PR ID
+          if [ "$NEWEST_PR" -ne 0 ]; then
+            echo "$NEWEST_PR" > last_pr_id.txt
+            echo "LATEST_PR_ID=$NEWEST_PR" >> $GITHUB_ENV
+          fi
+
+      - name: Save latest PR ID to cache
+        if: env.LATEST_PR_ID != ''
+        run: |
+          echo "Saving latest PR ID: $LATEST_PR_ID"
+          echo "$LATEST_PR_ID" > last_pr_id.txt
+
+      - name: Print PR Titles
+        run: echo "$MERGED_PRS"
 
       - name: Get PR Titles Merged into Main
         id: pr_titles
