@@ -21,6 +21,7 @@ jobs:
         with:
           path: last_pr_id.txt
           key: last-pr-id
+          restore-keys: last-pr-id-
 
       - name: Get last processed PR ID
         id: get_last_pr
@@ -60,6 +61,13 @@ jobs:
             echo "$NEWEST_PR" > last_pr_id.txt
             echo "LATEST_PR_ID=$NEWEST_PR" >> $GITHUB_ENV
           fi
+
+      - name: Save updated PR ID cache
+        uses: actions/cache@v3
+        with:
+          path: last_pr_id_cache.txt
+          key: last-pr-id
+          restore-keys: last-pr-id-
 
       - name: Save latest PR ID to cache
         if: env.LATEST_PR_ID != ''
@@ -150,6 +158,14 @@ jobs:
         with:
           name: splitsnap-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Save latest PR ID to cache
+        if: env.LATEST_PR_ID != ''
+        uses: actions/cache@v3
+        with:
+          path: last_pr_id.txt
+          key: last-pr-id-${{ env.LATEST_PR_ID }}
+          restore-keys: last-pr-id-
 
       - name: Save Gradle Cache
         if: always()
