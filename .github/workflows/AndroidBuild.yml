@@ -151,6 +151,14 @@ jobs:
           name: splitsnap-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
 
+      - name: Save Gradle Cache
+        if: always()
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
+
 
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
