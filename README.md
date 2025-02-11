@@ -50,7 +50,7 @@
 
 You can download the latest release of the app from the link below:
 
-[Download the app-release.apk](https://github.com/HomeAstronomer/AISplitwise/raw/refs/heads/master/release-apk/app-release.apk)
+[Download the app-release.apk](https://github.com/HomeAstronomer/splitsnap/raw/refs/heads/master/release-apk/app-release.apk)
 
 ##Material Theme For My Refrence
 [Theme](http://material-foundation.github.io?primary=%234D59FE&colorMatch=false)

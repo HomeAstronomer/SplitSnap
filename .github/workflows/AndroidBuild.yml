@@ -91,7 +91,7 @@ jobs:
       - name: Upload Release APK
         uses: actions/upload-artifact@v4.4.3
         with:
-          name: AISplitWise-Release.apk
+          name: splitsnap-Release.apk
           path: app/build/outputs/apk/release/app-release.apk
 
 

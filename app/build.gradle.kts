@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.dsl.NdkOptions.DebugSymbolLevel
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -14,12 +16,20 @@ plugins {
 }
 
 android {
-    namespace = "com.example.aisplitwise"
+    signingConfigs {
+        create("debugg") {
+            storeFile = file(project.property("debugKeystore").toString())
+            storePassword = project.property("debugKeystorePassword").toString()
+            keyAlias = project.property("debugKeyAlias").toString()
+            keyPassword = project.property("debugKeyPassword").toString()
+        }
+    }
+    namespace = "com.splitsnap"
     compileSdk = 35
 
 
     defaultConfig {
-        applicationId = "com.example.aisplitwise"
+        applicationId = "com.splitsnap"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -32,12 +42,19 @@ android {
     }
 
     buildTypes {
+        debug{
+            signingConfig = signingConfigs.getByName("debugg")
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel =
+                    DebugSymbolLevel.FULL.toString() // or DebugSymbolLevel.SYMBOL_TABLE
+            }
         }
     }
     compileOptions {

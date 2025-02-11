@@ -50,7 +50,7 @@
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 
--keep class com.example.aisplitwise.data.local.** { *; }
+-keep class com.splitsnap.data.local.** { *; }
 
 -keep class com.google.googlesignin.** { *; }
 -keepnames class com.google.googlesignin.* { *; }

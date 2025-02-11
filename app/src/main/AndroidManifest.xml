@@ -20,7 +20,7 @@
         android:icon="@drawable/logo_svg"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AISplitwise"
+        android:theme="@style/Theme.splitsnap"
         android:name=".SplitWiseApplication"
         android:forceDarkAllowed="false"
         tools:targetApi="31">
@@ -44,7 +44,7 @@
                 <data
 
                     android:scheme="https"
-                    android:host="com.example.aisplitwise"
+                    android:host="com.splitsnap"
                     android:pathPrefix="/joinGroup" />
             </intent-filter>
         </activity>
@@ -61,7 +61,7 @@
         </activity>
 
 <!--        <service-->
-<!--            android:name=".service.AISplitwiseFirebaseMessaging"-->
+<!--            android:name=".service.splitsnapFirebaseMessaging"-->
 <!--            android:exported="false">-->
 <!--            <intent-filter>-->
 <!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->

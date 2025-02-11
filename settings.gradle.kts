@@ -26,6 +26,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AISplitwise"
+rootProject.name = "splitsnap"
 include(":app")
  

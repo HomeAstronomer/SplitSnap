@@ -1,4 +1,4 @@
-package com.example.aisplitwise
+package com.splitsnap
 
 import org.junit.Test
 
