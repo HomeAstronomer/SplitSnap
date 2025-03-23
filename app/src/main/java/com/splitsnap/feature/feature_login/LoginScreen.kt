@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,22 +44,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RadialGradient
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.splitsnap.R
 import com.splitsnap.navigation.DashBoardRoute
 import com.splitsnap.navigation.LoginScreenRoute
@@ -67,22 +64,17 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
+import com.splitsnap.theme.SplitSnapTheme
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController) {
-Scaffold(modifier=Modifier.imePadding().background(MaterialTheme.colorScheme.background)) {padding->
+Scaffold(modifier= Modifier
+    .imePadding()
+    .background(MaterialTheme.colorScheme.surfaceBright)) {padding->
     val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var email by remember {
-        mutableStateOf("")
-    }
-
-    var password by remember {
-        mutableStateOf("")
-    }
-
     val oneTapClient = remember { Identity.getSignInClient(context) }
     val signInRequest by remember {
         mutableStateOf(
@@ -124,170 +116,232 @@ Scaffold(modifier=Modifier.imePadding().background(MaterialTheme.colorScheme.bac
             }
         }
     }
-
     val scrollState= rememberScrollState()
-    Column(
-        modifier = Modifier
+
+    val showGoogleLoader=remember { mutableStateOf(false) }
+    LoginScreenComposable(
+       modifier= Modifier
+           .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceBright.copy(0.7f),
+               MaterialTheme.colorScheme.surfaceBright)))
             .padding(padding)
-            .scrollable(
-                state = scrollState,
-                orientation = Orientation.Vertical
-            )
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Sign In",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom =24.dp),
-        )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        )
-
-        FilledTonalButton(
-            onClick = {
-                loginViewModel.signIn(email, password) {
-                    navController.navigate(DashBoardRoute)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-
-        ) {
-            Row( modifier = Modifier,verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector =  Icons.Default.Email, // Replace with your icon resource
-                    contentDescription = "Create Group", // Replace with your string resource
-                    modifier = Modifier
-                        .padding(end = 8.dp),
-                    tint = Color.Unspecified
-                )
-                Text(
-                    text = "Sign In with Email",
-                    fontStyle = MaterialTheme.typography.bodyMedium.fontStyle
-                )
-            }
-        }
+           .padding(24.dp)
+            .fillMaxSize(),
+       uiState =  uiState,
+       emailSignInClick =  { email, password ->
+           loginViewModel.signIn(email, password) {
+               navController.navigate(DashBoardRoute)
+           }
+                           },
+        googleSignInClick={ signInWithGoogle(oneTapClient,signInRequest,launcher){
+            showGoogleLoader.value=it
+        }},
+        navigate = { navController.navigate(it) },
+        showGoogleLoader=showGoogleLoader.value,
+        resetToast= loginViewModel::resetToast)
 
 
-        OutlinedButton(
-            onClick = {
-                navController.navigate(SignUpScreenRoute)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Row( modifier = Modifier,verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector =  Icons.Default.PersonAdd, // Replace with your icon resource
-                    contentDescription = "Create Group", // Replace with your string resource
-                    modifier = Modifier
-                        .padding(end = 8.dp),
-                    tint = Color.Unspecified
-                )
-                Text(
-                    text = "Sign Up with Email",
-                    fontStyle = MaterialTheme.typography.bodyMedium.fontStyle
-                )
-            }
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 24.dp)
-        )
-
-        val infiniteTransition = rememberInfiniteTransition(label = "background")
-
-        val showLoader=remember { mutableStateOf(false) }
-        val targetOffset = with(LocalDensity.current) {
-            1000.dp.toPx()
-        }
-        val offset by infiniteTransition.animateFloat(
-            initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
-                tween(5000, easing = LinearEasing), repeatMode = RepeatMode.Restart
-            ), label = "offset"
-        )
-        val brushColors = listOf(
-            Color(0xFF4285F4),  // Google Blue
-            Color(0xFFEA4335),  // Google Red
-            Color(0xFFFBBC05),  // Google Yellow
-            Color(0xFF34A853)   // Google Green
-        )
-        OutlinedButton(
-            onClick = {
-               signInWithGoogle(oneTapClient,signInRequest,launcher){
-                    showLoader.value=it
-               }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-            .then(if (showLoader.value)Modifier.fillMaxWidth().border(2.dp, brush = Brush.linearGradient(
-                colors = brushColors,
-                start = Offset(offset, offset),
-                end = Offset(offset + 1000f, offset + 1000f),
-                tileMode = TileMode.Repeated
-            ) , shape = RoundedCornerShape(24.dp)) else Modifier.padding(2.dp)),
-            enabled = true
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.android_neutral_rd_na), // Replace with your icon resource
-                    contentDescription = "Create Group", // Replace with your string resource
-                    modifier = Modifier.size(36.dp)
-                        .padding(end = 8.dp),
-                    tint = Color.Unspecified
-                )
-                Text(text = "Sign In with Google ",
-                    fontStyle = MaterialTheme.typography.bodyMedium.fontStyle)
-            }
-        }
-    }
-
-    LaunchedEffect(key1 = uiState.showToast) {
-        if (uiState.showToast) {
-            Toast.makeText(
-                context,
-                uiState.toastMessage,
-                Toast.LENGTH_SHORT,
-            ).show()
-            delay(2.seconds)
-            loginViewModel.resetToast()
-        }
-
-    }
-    if(uiState.showLoader) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))) {
-            CircularProgressIndicator(
-                Modifier
-                    .size(64.dp)
-                    .align(Alignment.Center),
-                strokeWidth =8.dp )
-        }
-    }
 
 }
+}
+
+@Composable
+fun LoginScreenComposable(
+    modifier: Modifier,
+    uiState: LoginScreenUiState,
+    emailSignInClick: (String, String) -> Unit,
+    googleSignInClick: () -> Unit,
+    navigate: (Any)->Unit,
+    showGoogleLoader:Boolean=false,
+    resetToast: () -> Unit,
+) {
+    val context = LocalContext.current
+    var email by remember {
+        mutableStateOf("")
+    }
+
+    var password by remember {
+        mutableStateOf("")
+    }
+    Box(modifier=modifier) {
+        Column(Modifier.align(Alignment.Center)) {
+            Column(
+                modifier = Modifier.background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.secondaryContainer.copy(0.5f)
+                        )
+                    ), RoundedCornerShape(16.dp)
+                ).padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Sign In",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(bottom = 24.dp),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = {
+                        Text(
+                            "Email",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = {
+                        Text(
+                            "Password",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp)
+                )
+
+                OutlinedButton(
+                    onClick = { emailSignInClick.invoke(email, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+
+                ) {
+                    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Email, // Replace with your icon resource
+                            contentDescription = "Create Group", // Replace with your string resource
+                            modifier = Modifier
+                                .padding(end = 8.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "Sign In with Email",
+                            fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+
+
+                OutlinedButton(
+                    onClick = {
+                        navigate(SignUpScreenRoute)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd, // Replace with your icon resource
+                            contentDescription = "Create Group", // Replace with your string resource
+                            modifier = Modifier
+                                .padding(end = 8.dp),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            text = "Sign Up with Email",
+                            fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+
+            }
+            val infiniteTransition = rememberInfiniteTransition(label = "background")
+
+
+            val targetOffset = with(LocalDensity.current) {
+                1000.dp.toPx()
+            }
+            val offset by infiniteTransition.animateFloat(
+                initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
+                    tween(5000, easing = LinearEasing), repeatMode = RepeatMode.Restart
+                ), label = "offset"
+            )
+            val brushColors = listOf(
+                Color(0xFF4285F4),  // Google Blue
+                Color(0xFFEA4335),  // Google Red
+                Color(0xFFFBBC05),  // Google Yellow
+                Color(0xFF34A853)   // Google Green
+            )
+            OutlinedButton(
+                onClick = googleSignInClick,
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
+                    .fillMaxWidth()
+                    .then(
+                        if (showGoogleLoader) Modifier
+                            .fillMaxWidth()
+                            .border(
+                                2.dp, brush = Brush.linearGradient(
+                                    colors = brushColors,
+                                    start = Offset(offset, offset),
+                                    end = Offset(offset + 1000f, offset + 1000f),
+                                    tileMode = TileMode.Repeated
+                                ), shape = RoundedCornerShape(24.dp)
+                            ) else Modifier.padding(2.dp)
+                    ),
+                enabled = true
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.android_neutral_rd_na), // Replace with your icon resource
+                        contentDescription = "Create Group", // Replace with your string resource
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(end = 8.dp),
+                        tint = Color.Unspecified
+                    )
+                    Text(
+                        text = "Sign In with Google ",
+                        fontStyle = MaterialTheme.typography.bodyMedium.fontStyle,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
+        LaunchedEffect(key1 = uiState.showToast) {
+            if (uiState.showToast) {
+                Toast.makeText(
+                    context,
+                    uiState.toastMessage,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                delay(2.seconds)
+                resetToast()
+            }
+
+        }
+        if (uiState.showLoader) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))
+            ) {
+                CircularProgressIndicator(
+                    Modifier
+                        .size(64.dp)
+                        .align(Alignment.Center),
+                    strokeWidth = 8.dp
+                )
+            }
+        }
+    }
 }
 
 fun signInWithGoogle(
@@ -313,41 +367,52 @@ fun signInWithGoogle(
         }
 }
 
+
+@Preview(uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES or android.content.res.Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
-fun RotatingSweepGradientBorderBox(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition()
-
-    // Animate the rotation angle
-    val rotationAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    // Animated Sweep Gradient Brush
-    val animatedBrush = Brush.sweepGradient(
-        colors = listOf(Color.Red, Color.Green, Color.Blue, Color.Red)
-    )
-
-    Box(
-        modifier = modifier
-            .size(150.dp)
-            .graphicsLayer {
-                rotationZ = rotationAngle  // Rotates the entire border
-            }
-            .border(4.dp, animatedBrush, shape = RoundedCornerShape(24.dp)), // Apply animated brush to border
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "Rotating Border", color = Color.White, fontSize = 16.sp)
+fun PreviewRotatingSweepGradientBorderBox() {
+    SplitSnapTheme {
+        Scaffold(
+            modifier = Modifier
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(0.2f)
+                        )
+                    )
+                )
+                .imePadding()
+        ) { padding ->
+            LoginScreenComposable(Modifier.background(
+                MaterialTheme.colorScheme.surfaceContainer
+            )
+                .padding(padding)
+                .fillMaxSize()
+                .padding(16.dp), LoginScreenUiState(), { _, _ -> }, {}, {}) { }
+        }
     }
 }
 
 @Preview
 @Composable
-fun PreviewRotatingSweepGradientBorderBox() {
-    RotatingSweepGradientBorderBox()
+fun PreviewRotatingSweepGradientBorderBoxLight() {
+    SplitSnapTheme {
+        Scaffold(
+            modifier = Modifier
+                .background(
+                    MaterialTheme.colorScheme.surfaceContainer
+                )
+                .imePadding()
+        ) { padding ->
+            LoginScreenComposable(Modifier.background(
+                MaterialTheme.colorScheme.surfaceContainer
+            )
+                .padding(padding)
+                .fillMaxSize()
+                .padding(16.dp), LoginScreenUiState(), { _, _ -> }, {}, {}) { }
+        }
+    }
 }
+
 

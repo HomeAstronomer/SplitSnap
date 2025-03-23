@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.splitsnap.feature.feature_Image_Acceptor.ImageAcceptorScreen
-import com.splitsnap.theme.splitsnapTheme
+import com.splitsnap.theme.SplitSnapTheme
 import com.google.firebase.vertexai.GenerativeModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -29,7 +29,7 @@ class ImageAcceptorActivity : ComponentActivity() {
 
 
         setContent {
-            splitsnapTheme {
+            SplitSnapTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Transparent

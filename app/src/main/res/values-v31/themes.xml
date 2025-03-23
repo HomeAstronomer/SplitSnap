@@ -3,7 +3,7 @@
     <style name="Theme.SnapSplit.StartingScreen" parent="Theme.SplashScreen.IconBackground">
 
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="windowSplashScreenAnimationDuration">1500</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/avd_padded</item>
         <item name="postSplashScreenTheme">@style/Theme.SnapSplit.AppTheme</item>
         <item name="android:splashScreenTheme">@style/Theme.SnapSplit.AppTheme</item>

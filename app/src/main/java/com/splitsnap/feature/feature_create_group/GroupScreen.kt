@@ -1,5 +1,6 @@
 package com.splitsnap.feature.feature_create_group
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -119,7 +121,7 @@ fun  CreateGroupScreen(
                             .weight(1f)
                             .padding(horizontal = 24.dp), columns = GridCells.Fixed(4)
                     ) {
-                        items(uiState.imgList) { item ->
+                        items(uiState.imgList,{it}) { item ->
                             val selected by remember(selectedImage) {
                                 mutableStateOf(item.compareTo(selectedImage) == 0)
                             }

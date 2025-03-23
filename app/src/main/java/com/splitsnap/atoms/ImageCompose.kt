@@ -37,7 +37,6 @@ fun ImageCompose(modifier: Modifier=Modifier,
             .data(data)
             .crossfade(true)
             .crossfade(400)
-            .placeholder(loadingImg)
             .error(errorImg)
             .build(),
         contentDescription = "",

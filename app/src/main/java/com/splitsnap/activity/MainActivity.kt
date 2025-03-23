@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.splitsnap.navigation.NavHostInitializer
-import com.splitsnap.theme.splitsnapTheme
+import com.splitsnap.theme.SplitSnapTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,13 +37,9 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val isLoggedIn= Firebase.auth.currentUser
 
-            installSplashScreen().apply {
-                setKeepOnScreenCondition {
-                    false
-                }
-            }
+            installSplashScreen()
 
-            splitsnapTheme {
+            SplitSnapTheme {
                 NavHostInitializer(navController, isLoggedIn)
             }
 
@@ -63,7 +59,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    splitsnapTheme  {
+    SplitSnapTheme  {
        val Coral = MaterialTheme.colorScheme.tertiary
         val LightYellow =MaterialTheme.colorScheme.tertiaryContainer
         @Language("AGSL")

@@ -267,11 +267,11 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
         val context = LocalContext.current
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = if (isMe) Alignment.Start else Alignment.End // Align based on isMe
+            horizontalAlignment = Alignment.Start // Align based on isMe
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End // Align amount based on isMe
+                horizontalArrangement = Arrangement.Start // Align amount based on isMe
             ) {
                 Icon(
                     imageVector = Icons.Default.AttachMoney,

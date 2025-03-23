@@ -18,17 +18,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import java.net.URL
 import java.util.Date
 import javax.inject.Inject
 
 @Immutable
 data class CreateGroupUIState(
-    val imgList: List<String> =emptyList(),
+    val imgList: List<String> =listOf(
+        "https://firebasestorage.googleapis.com/v0/b/splitsnap-8c640.firebasestorage.app/o/groupImages%2Fairplane_1350120.png?alt=media&token=04b4b4f8-8b1a-4385-9815-88bf562e6d95",
+        "https://firebasestorage.googleapis.com/v0/b/splitsnap-8c640.firebasestorage.app/o/groupImages%2Fbull-market.png?alt=media&token=8f2ebcf1-69fd-47ba-a12b-e08886bec0c5",
+        "https://firebasestorage.googleapis.com/v0/b/splitsnap-8c640.firebasestorage.app/o/groupImages%2Fcake_918234.png?alt=media&token=06b64f1c-aaf8-4ede-8fe5-a843e161814f",
+        "https://firebasestorage.googleapis.com/v0/b/splitsnap-8c640.firebasestorage.app/o/groupImages%2Fcampfire_6154686.png?alt=media&token=dd5feb9c-0a07-452d-ada1-37023d7e25ea",
+    ),
     val showLoader:Boolean=false,
     val member:Member?=null,
     val showToast:Boolean=false,
@@ -69,7 +77,7 @@ class CreateGroupViewModel @Inject constructor(
     )
     private fun getallImageURI() {
         viewModelScope.launch (Dispatchers.IO) {
-            getAllImageUrisFromFirebase("groupImages")
+            getAllImageUrisFromFirebase("groupImages/imgJsonList.json")
         }
     }
 
@@ -81,19 +89,25 @@ class CreateGroupViewModel @Inject constructor(
         val imageUris = ArrayList<String>()
 
         try {
-            // List all items (files) in the folder
-            val result = storageReference.listAll().await()
+            // Get the download URL of the JSON file
+            val jsonUri = storageReference.downloadUrl.await()
 
-            // Loop through the items and get their download URIs
-            for (fileRef in result.items) {
-                val uri = fileRef.downloadUrl.await()  // Get the download URL asynchronously
-                imageUris.add(uri.toString())  // Add URI to the list
+            // Download the JSON file's content
+            val jsonString = withContext(Dispatchers.IO) {
+                URL(jsonUri.toString()).readText()
+            }
+
+            // Parse the JSON to extract the URIs
+            val jsonArray = JSONArray(jsonString)
+            for (i in 0 until jsonArray.length()) {
+                imageUris.add(jsonArray.getString(i))
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Handle any errors (e.g., folder not found, network issues)
+            // Handle any errors (e.g., file not found, network issues)
         }
+
         _uiState.update { it.copy(imgList = imageUris) }
         return imageUris
     }

@@ -43,11 +43,11 @@ class DashboardViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = DashboardUiState()
     )
+    var isDeeplinkDialogShown=false
 
     init {
         getGroupsFromDb()
         getMembersFromDb()
-//        fireBaseInitWithDummyData()
     }
 
     private fun getMembersFromDb() {
@@ -79,45 +79,5 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    fun getNewGroupId(): String {
-        return groupRepository.getNewGroupId()
-    }
-
-    fun createGroup() {
-        _uiState.update { it.copy(showLoader = true) }
-        viewModelScope.launch(Dispatchers.IO) {
-            uiState.value.member?.let {
-                val group = Group(
-                    id = getNewGroupId(),
-                    name = "The Boys",
-                    members = listOf(it),
-                    createdAt = Timestamp(Date()),
-                    updatedAt = Timestamp(Date()),
-                )
-                groupRepository.createGroup(group, it.uid).collect { dataState ->
-                    _uiState.update { it.copy(showLoader = false) }
-                    when (dataState) {
-                        is DataState.Success -> {
-                            _uiState.update {uistate->
-                                uistate.copy(showToast = true, toastMessage = "Group Created Successfully")
-                            }
-                        }
-
-                        is DataState.Error -> {
-                            _uiState.update {uistate->
-                                uistate.copy(
-                                    showToast = true,
-                                    toastMessage = dataState.errorMessage
-                                )
-                            }
-                        }
-                        else->{}
-                    }
-
-                }
-            }
-        }
-
-    }
 
 }

@@ -1,6 +1,5 @@
 package com.splitsnap.feature.dashboard
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -34,7 +33,6 @@ import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -92,6 +90,10 @@ fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostCont
             dashBoardViewModel::getGroupsApiCall,
             uiState.groupList,
             navigateGroup = { navController.navigate(LedgerRoute(it)) },
+            dashBoardViewModel.isDeeplinkDialogShown,
+            {
+                dashBoardViewModel.isDeeplinkDialogShown=true
+            }
         )
 
 
@@ -118,12 +120,14 @@ fun DashBoardContent(
     getGroupsApiCall: () -> Unit,
     groupList: List<Group> = emptyList(),
     navigateGroup: (String) -> Unit,
+    deeplinkDialogShown: Boolean,
+    updateDialogShownCheck:()->Unit
 ) {
     val context=LocalContext.current
     var showApplinkDialog = remember{ mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if(Build.VERSION.SDK_INT>=31) {
+        if(Build.VERSION.SDK_INT>=31 && !deeplinkDialogShown) {
             val manager = context.getSystemService(DomainVerificationManager::class.java)
             val userState = manager.getDomainVerificationUserState(context.packageName)
 
@@ -140,6 +144,7 @@ fun DashBoardContent(
             val unapprovedDomains = userState?.hostToStateMap
                 ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
             if(unapprovedDomains?.isNotEmpty()==true){
+                updateDialogShownCheck.invoke()
                 showApplinkDialog.value=true
 
             }
@@ -369,16 +374,19 @@ fun DashboardHeaderPreview() {
 fun DashboardContentPreview() {
     Surface(color = Color.White) {
 
-        DashBoardContent(Modifier, getGroupsApiCall = {}, groupList = listOf(
-            Group(
-                id = "group1",
-                name = "Weekend Getaway",
-                members = emptyList(),
-                createdAt = Timestamp(Date()),
-                updatedAt = Timestamp(Date()),
-                groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
-            )
-        ), navigateGroup = {}
+        DashBoardContent(
+            getGroupsApiCall = {}, groupList = listOf(
+                Group(
+                    id = "group1",
+                    name = "Weekend Getaway",
+                    members = emptyList(),
+                    createdAt = Timestamp(Date()),
+                    updatedAt = Timestamp(Date()),
+                    groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
+                )
+            ), navigateGroup = {}, deeplinkDialogShown = false,
+            modifier = TODO(),
+            updateDialogShownCheck = TODO()
         )
     }
 }

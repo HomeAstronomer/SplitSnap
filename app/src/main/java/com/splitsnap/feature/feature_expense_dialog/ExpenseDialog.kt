@@ -135,7 +135,7 @@ fun ExpenseDialog(
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
-                    LocationButton{ lat, lon ->
+                    LocationButton(true){ lat, lon ->
                         latitude = lat
                         longitude = lon
                         // You can now use latitude and longitude in your expense message
@@ -219,7 +219,7 @@ fun ExpenseDialog(
 }
 
 @Composable
-fun LocationButton(onLocationReceived: (latitude: Double, longitude: Double) -> Unit) {
+fun LocationButton(launchPermissionWithoutClick:Boolean=false,onLocationReceived: (latitude: Double, longitude: Double) -> Unit) {
     val context = LocalContext.current
     var permissionGranted by remember {
         mutableStateOf(
@@ -243,6 +243,10 @@ fun LocationButton(onLocationReceived: (latitude: Double, longitude: Double) -> 
                 onLocationReceived.invoke(lat, Long)
 
             }
+        }else{
+            if(launchPermissionWithoutClick) {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
         }
     }
     Box(contentAlignment = Alignment.Center) {
@@ -262,8 +266,7 @@ fun LocationButton(onLocationReceived: (latitude: Double, longitude: Double) -> 
                 )
                 .clip(CircleShape), onClick = {
                     if(!permissionGranted){
-                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-
+                        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
             }) {
             if (permissionGranted) {
