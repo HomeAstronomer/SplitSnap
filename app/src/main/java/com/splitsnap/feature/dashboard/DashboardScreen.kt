@@ -65,6 +65,7 @@ import com.splitsnap.navigation.JoinGroupDialogRoute
 import com.splitsnap.navigation.LedgerRoute
 import com.splitsnap.utils.ifNullOrEmpty
 import com.google.firebase.Timestamp
+import com.splitsnap.navigation.ProfileRoute
 import java.util.Date
 
 
@@ -255,7 +256,8 @@ fun DashboardHeader(
                 SubcomposeAsyncImage(
                     modifier = Modifier
                         .size(64.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape)
+                        .clickable{navController.navigate(ProfileRoute)},
                     model = ImageRequest.Builder(context).data(route?.photoUrl ?: "")
                         .crossfade(true)
 

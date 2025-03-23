@@ -275,3 +275,9 @@ fun SplitSnapTheme(
   )
 }
 
+enum class SplitSnapThemeEnum {
+    LIGHT,
+    DARK,
+    SYSTEM_DEFAULT
+}
+

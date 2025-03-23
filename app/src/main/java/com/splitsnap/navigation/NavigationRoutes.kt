@@ -30,3 +30,6 @@ data class JoinGroupDialogRoute(val groupId:String="")
 
 @Serializable
 data class HeatMapRoute(val groupId:String="")
+
+@Serializable
+object ProfileRoute

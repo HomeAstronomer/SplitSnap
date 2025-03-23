@@ -25,6 +25,7 @@ import com.splitsnap.feature.feature_login.LoginScreen
 import com.splitsnap.feature.feature_signup.SignUpScreen
 import com.splitsnap.feature.feature_splash.SplashScreen
 import com.google.firebase.auth.FirebaseUser
+import com.splitsnap.feature.feature_Profile.ProfileScreen
 
 @Composable
 fun NavHostInitializer(navController: NavHostController, isLoggedIn: FirebaseUser?) {
@@ -118,6 +119,16 @@ fun NavHostInitializer(navController: NavHostController, isLoggedIn: FirebaseUse
         ) {
             HeatMapScreen()
         }
+
+        composable<ProfileRoute>(
+            enterTransition = { slideInOutTransition(slideDirection = SlideDirection.RightToLeft).first() },
+            exitTransition = { fadeOut(tween(300,100)) },
+            popExitTransition = { slideInOutTransition(slideDirection = SlideDirection.LeftToRight).second() },
+            popEnterTransition =  { fadeIn() },
+        ) {
+            ProfileScreen()
+        }
+
         dialog<AddMemberDialogRoute>(dialogProperties = DialogProperties(usePlatformDefaultWidth = false)) {
 
             AddMemberDialog(
@@ -125,6 +136,7 @@ fun NavHostInitializer(navController: NavHostController, isLoggedIn: FirebaseUse
                 groupId= it.arguments?.getString("groupId")?:""
             )
         }
+
         val uri="https://com.splitsnap"
         dialog<JoinGroupDialogRoute>(dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
             deepLinks = listOf(navDeepLink { uriPattern= "$uri/joinGroup/{groupId}"})

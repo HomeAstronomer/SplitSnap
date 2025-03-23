@@ -20,3 +20,6 @@ local.properties
 /.idea/runConfigurations.xml
 .idea/
 
+/my-debug-key.jks
+/-n-b
+/app/release/output-metadata.json
