@@ -102,10 +102,10 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
         val signInRequest by remember {
             mutableStateOf(
                 BeginSignInRequest.builder().setGoogleIdTokenRequestOptions(
-                        BeginSignInRequest.GoogleIdTokenRequestOptions.builder().setSupported(true)
-                            .setServerClientId("460580943651-q86lp28u749cohktgmbojp7mnb4b5492.apps.googleusercontent.com")
-                            .setFilterByAuthorizedAccounts(false).build()
-                    ).setAutoSelectEnabled(true).build()
+                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder().setSupported(true)
+                        .setServerClientId("460580943651-q86lp28u749cohktgmbojp7mnb4b5492.apps.googleusercontent.com")
+                        .setFilterByAuthorizedAccounts(false).build()
+                ).setAutoSelectEnabled(true).build()
             )
         }
 
@@ -143,7 +143,8 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f)
                     .background(
-                        MaterialTheme.colorScheme.primaryContainer, shape = BottomArcShape(arcHeight = 50.dp)
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = BottomArcShape(arcHeight = 50.dp)
                     )
             )
             Column(
@@ -157,15 +158,16 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                 Image(
                     painter = painterResource(R.drawable.logo_svg),
                     contentDescription = null,
-                    modifier = Modifier.weight(1f)
-                        .padding(top = padding.calculateTopPadding()+24.dp, bottom = 24.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = padding.calculateTopPadding() + 24.dp, bottom = 24.dp)
                         .fillMaxHeight(0.15f)
                 )
                 Column(
                     modifier = Modifier
 
                         .padding(24.dp)
-                        .background(MaterialTheme.colorScheme.onPrimary,RoundedCornerShape(24.dp))
+                        .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(24.dp))
                         .border(1.dp, Color.Gray, RoundedCornerShape(24.dp))
 
                         .scrollable(
@@ -206,7 +208,7 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                             .padding(bottom = 16.dp)
                     )
 
-                    OutlinedButton (
+                    OutlinedButton(
                         onClick = {
                             loginViewModel.signIn(email, password) {
                                 navController.navigate(DashBoardRoute)
@@ -240,8 +242,7 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                             color = MaterialTheme.colorScheme.primary,
                             fontStyle = MaterialTheme.typography.labelSmall.fontStyle,
                             fontWeight = FontWeight.Bold,
-                            modifier=Modifier.clickable{ navController.navigate(SignUpScreenRoute)}
-                        )
+                            modifier = Modifier.clickable { navController.navigate(SignUpScreenRoute) })
                     }
 
                     Box(contentAlignment = Alignment.Center) {
@@ -249,7 +250,10 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 24.dp)
                         )
-                        Text(" or ",modifier=Modifier.background(MaterialTheme.colorScheme.onPrimary))
+                        Text(
+                            " or ",
+                            modifier = Modifier.background(MaterialTheme.colorScheme.onPrimary)
+                        )
                     }
                     val showLoader = remember { mutableStateOf(false) }
 
@@ -300,18 +304,18 @@ fun signInWithGoogle(
 ) {
     showLoader.invoke(true)
     oneTapClient.beginSignIn(signInRequest).addOnSuccessListener { result ->
-            showLoader.invoke(false)
-            try {
-                val intentSenderRequest =
-                    IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
-                launcher.launch(intentSenderRequest)  // Start the One Tap sign-in UI
-            } catch (e: Exception) {
-                Log.e("SignIn", "Couldn't start One Tap UI: ${e.localizedMessage}")
-            }
-        }.addOnFailureListener { e ->
-            showLoader.invoke(false)
-            Log.e("SignIn", "One Tap sign-in failed: ${e.localizedMessage}")
+        showLoader.invoke(false)
+        try {
+            val intentSenderRequest =
+                IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
+            launcher.launch(intentSenderRequest)  // Start the One Tap sign-in UI
+        } catch (e: Exception) {
+            Log.e("SignIn", "Couldn't start One Tap UI: ${e.localizedMessage}")
         }
+    }.addOnFailureListener { e ->
+        showLoader.invoke(false)
+        Log.e("SignIn", "One Tap sign-in failed: ${e.localizedMessage}")
+    }
 }
 
 @Composable
