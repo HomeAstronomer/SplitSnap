@@ -215,7 +215,6 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                             }
                         }, modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 24.dp)
 
                     ) {
                         Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -231,24 +230,11 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                         }
                     }
 
-                    Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "New to SplitSnap? ",
-                            color = Color.Gray,
-                            fontStyle = MaterialTheme.typography.labelSmall.fontStyle,
-                        )
-                        Text(
-                            text = "Create An Account",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontStyle = MaterialTheme.typography.labelSmall.fontStyle,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable { navController.navigate(SignUpScreenRoute) })
-                    }
 
                     Box(contentAlignment = Alignment.Center) {
 
                         HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 24.dp)
+                            modifier = Modifier.padding(vertical = 16.dp)
                         )
                         Text(
                             " or ",
@@ -262,6 +248,21 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                             showLoader.value = it
                         }
                     })
+
+                    Row(modifier = Modifier.padding(top = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "New to SplitSnap? ",
+                            color = Color.Gray,
+                            fontStyle = MaterialTheme.typography.labelSmall.fontStyle,
+                        )
+                        Text(
+                            text = "Create An Account",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontStyle = MaterialTheme.typography.labelSmall.fontStyle,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable { navController.navigate(SignUpScreenRoute) })
+                    }
+
                 }
                 Spacer(Modifier.weight(1f))
             }
