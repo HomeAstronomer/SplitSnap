@@ -1,9 +1,7 @@
-package com.splitsnap.data.local
+package com.local.data.local
 
 import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.compose.runtime.Stable
-import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
@@ -13,7 +11,6 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.Serializable
 
 const val MEMBER_TABLE="member_table"
 @Keep

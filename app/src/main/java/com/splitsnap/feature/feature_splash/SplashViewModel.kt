@@ -3,7 +3,7 @@ package com.splitsnap.feature.feature_splash
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.splitsnap.data.repository.MemberRepository
+import com.local.data.repository.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

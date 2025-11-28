@@ -1,8 +1,7 @@
-package com.splitsnap.data.local
+package com.local.data.local
 
 import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.compose.runtime.Stable
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
@@ -18,7 +17,6 @@ import java.util.Date
 const val GROUP_TABLE="group_table"
 @Keep
 @Parcelize
-@Stable
 @Entity(tableName = GROUP_TABLE)
 data class Group(
     @PrimaryKey

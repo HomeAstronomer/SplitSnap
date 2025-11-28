@@ -1,6 +1,6 @@
 package com.splitsnap.feature.dashboard
 
-import android.annotation.SuppressLint
+import com.splitsnap.R
 import android.content.Intent
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
@@ -34,11 +35,10 @@ import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,14 +54,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
-import com.splitsnap.data.local.Group
-import com.splitsnap.data.local.Member
+import com.local.data.local.Group
+import com.local.data.local.Member
 import com.splitsnap.navigation.CreateGroupRoute
 import com.splitsnap.navigation.JoinGroupDialogRoute
 import com.splitsnap.navigation.LedgerRoute
@@ -79,7 +81,8 @@ fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostCont
             .navigationBarsPadding()
             .imePadding(),
         topBar = {
-            DashboardHeader(uiState.member,
+            DashboardHeader(
+                uiState.member,
                 { navController.navigate(CreateGroupRoute) },
                 navController = navController
             )
@@ -119,31 +122,34 @@ fun DashBoardContent(
     groupList: List<Group> = emptyList(),
     navigateGroup: (String) -> Unit,
 ) {
-    val context=LocalContext.current
-    var showApplinkDialog = remember{ mutableStateOf(false) }
+    val context = LocalContext.current
+    var showApplinkDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if(Build.VERSION.SDK_INT>=31) {
+        if (Build.VERSION.SDK_INT >= 31) {
             val manager = context.getSystemService(DomainVerificationManager::class.java)
             val userState = manager.getDomainVerificationUserState(context.packageName)
 
 // Domains that have passed Android App Links verification.
-            val verifiedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED }
+            val verifiedDomains =
+                userState?.hostToStateMap?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED }
 
 // Domains that haven't passed Android App Links verification but that the user
 // has associated with an app.
-            val selectedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_SELECTED }
+            val selectedDomains =
+                userState?.hostToStateMap?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_SELECTED }
 
 // All other domains.
-            val unapprovedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
-            if(unapprovedDomains?.isNotEmpty()==true){
-                showApplinkDialog.value=true
+            val unapprovedDomains =
+                userState?.hostToStateMap?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
+            if (unapprovedDomains?.isNotEmpty() == true) {
+                showApplinkDialog.value = true
 
             }
-            Log.i("AppLinks","verifiedDomains:- $verifiedDomains \nselectedDomains: $selectedDomains \nunapprovedDomain:- $unapprovedDomains ")
+            Log.i(
+                "AppLinks",
+                "verifiedDomains:- $verifiedDomains \nselectedDomains: $selectedDomains \nunapprovedDomain:- $unapprovedDomains "
+            )
         }
     }
     Box(modifier = modifier) {
@@ -160,9 +166,11 @@ fun DashBoardContent(
                                 .padding(end = 8.dp)
                                 .weight(1f),
                             style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Icon(imageVector = Icons.Rounded.Replay, // Replace with your icon resource
+                        Icon(
+                            imageVector = Icons.Rounded.Replay, // Replace with your icon resource
                             contentDescription = "Refresh Group", // Replace with your string resource
                             modifier = Modifier
                                 .size(24.dp)
@@ -186,44 +194,35 @@ fun DashBoardContent(
         }
     }
     AnimatedVisibility(showApplinkDialog.value) {
-        AlertDialog(
-            icon = {
-                Icon(Icons.Default.SettingsSuggest, contentDescription = "Example Icon")
-            },
-            title = {
-                Text(text = "Enable Link Opening by Default")
-            },
-            text = {
-                Text(text = "To provide a seamless experience, please allow this app to open links automatically from your system settings. After that, click on 'Add Link' to set the default")
-            },
-            onDismissRequest = {
-                showApplinkDialog.value = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val intent = Intent(
-                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                            Uri.parse("package:${context.packageName}")
-                        )
-                        context.startActivity(intent)
+        AlertDialog(icon = {
+            Icon(Icons.Default.SettingsSuggest, contentDescription = "Example Icon")
+        }, title = {
+            Text(text = "Enable Link Opening by Default")
+        }, text = {
+            Text(text = "To provide a seamless experience, please allow this app to open links automatically from your system settings. After that, click on 'Add Link' to set the default")
+        }, onDismissRequest = {
+            showApplinkDialog.value = false
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    val intent = Intent(
+                        Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                        Uri.parse("package:${context.packageName}")
+                    )
+                    context.startActivity(intent)
 
-                        showApplinkDialog.value=false
-                    }
-                ) {
-                    Text("Go to Settings")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showApplinkDialog.value = false
-                    }
-                ) {
-                    Text("Dismiss")
-                }
+                    showApplinkDialog.value = false
+                }) {
+                Text("Go to Settings")
             }
-        )
+        }, dismissButton = {
+            TextButton(
+                onClick = {
+                    showApplinkDialog.value = false
+                }) {
+                Text("Dismiss")
+            }
+        })
     }
 
 }
@@ -236,7 +235,10 @@ fun DashboardHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(
+                MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(0.dp, 0.dp, 24.dp, 24.dp),
+            )
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
 
@@ -264,11 +266,8 @@ fun DashboardHeader(
                         )
                     },
                     error = {
-                        Icon(
-                            imageVector = Icons.Rounded.AccountCircle, // Replace with your icon resource
-                            contentDescription = "Create Group", // Replace with your string resource
-                            modifier = Modifier.size(64.dp)
-                        )
+                        Icon(modifier=Modifier.size(64.dp),painter= painterResource(R.drawable.user),contentDescription="User Image", tint = Color.Unspecified)
+
                     },
                     contentScale = ContentScale.FillBounds
                 )
@@ -279,17 +278,20 @@ fun DashboardHeader(
                     Text(
                         text = route?.displayName ?: "No Name",
                         style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = route?.email ?: "No Email",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black.copy(alpha=0.6f)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = route?.phoneNumber?.ifNullOrEmpty { "No Phone Number" }
                             ?: "No Phone Number",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black.copy(alpha=0.6f)
                     )
                 }
             }
@@ -297,10 +299,10 @@ fun DashboardHeader(
             Row(
 
 
-                modifier = Modifier.padding(top=16.dp),
+                modifier = Modifier.padding(top = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                ElevatedButton (
                     onClick = {
                         createGroup()
                     }, modifier = Modifier
@@ -321,7 +323,7 @@ fun DashboardHeader(
                         )
                     }
                 }
-                OutlinedButton(
+                ElevatedButton(
                     onClick = {
                         navController.navigate(JoinGroupDialogRoute(""))
                     },
@@ -369,16 +371,16 @@ fun DashboardHeaderPreview() {
 fun DashboardContentPreview() {
     Surface(color = Color.White) {
 
-        DashBoardContent(Modifier, getGroupsApiCall = {}, groupList = listOf(
-            Group(
-                id = "group1",
-                name = "Weekend Getaway",
-                members = emptyList(),
-                createdAt = Timestamp(Date()),
-                updatedAt = Timestamp(Date()),
-                groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
-            )
-        ), navigateGroup = {}
-        )
+        DashBoardContent(
+            Modifier, getGroupsApiCall = {}, groupList = listOf(
+                Group(
+                    id = "group1",
+                    name = "Weekend Getaway",
+                    members = emptyList(),
+                    createdAt = Timestamp(Date()),
+                    updatedAt = Timestamp(Date()),
+                    groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
+                )
+            ), navigateGroup = {})
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.jetsnack.ui.components
+package com.local.jetsnack.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background

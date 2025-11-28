@@ -1,15 +1,15 @@
-package com.splitsnap.data
+package com.local.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.splitsnap.data.local.Converters
-import com.splitsnap.data.local.ExpenseDao
-import com.splitsnap.data.local.Group
-import com.splitsnap.data.local.Expense
-import com.splitsnap.data.local.GroupDao
-import com.splitsnap.data.local.Member
-import com.splitsnap.data.local.MemberDao
+import com.local.data.local.Converters
+import com.local.data.local.ExpenseDao
+import com.local.data.local.Group
+import com.local.data.local.Expense
+import com.local.data.local.GroupDao
+import com.local.data.local.Member
+import com.local.data.local.MemberDao
 
 @Database(entities = [Group::class,
                      Member::class,

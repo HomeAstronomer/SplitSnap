@@ -3,11 +3,11 @@ package com.splitsnap.feature.dashboard
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.splitsnap.data.local.Group
-import com.splitsnap.data.local.Member
-import com.splitsnap.data.repository.DataState
-import com.splitsnap.data.repository.GroupRepository
-import com.splitsnap.data.repository.MemberRepository
+import com.local.data.local.Group
+import com.local.data.local.Member
+import com.local.data.repository.DataState
+import com.local.data.repository.GroupRepository
+import com.local.data.repository.MemberRepository
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

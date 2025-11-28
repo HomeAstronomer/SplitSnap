@@ -84,7 +84,7 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":local"))
     // Core Libraries
     implementation(libs.androidx.core.ktx)
 
@@ -107,17 +107,11 @@ dependencies {
     // Hilt Libraries
     implementation(libs.hilt.android)
     implementation(libs.hilt.android.gradle)
-    implementation(libs.firebase.firestore.ktx)
     implementation(libs.play.services.location)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.androidx.navigation.compose)
 
     //Room Libraries
-    implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.paging)
 
     // Testing Libraries
     testImplementation(libs.junit)

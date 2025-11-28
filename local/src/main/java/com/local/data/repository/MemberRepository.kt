@@ -1,9 +1,9 @@
-package com.splitsnap.data.repository
+package com.local.data.repository
 
 import android.util.Log
-import com.splitsnap.data.local.Member
-import com.splitsnap.data.local.MemberDao
-import com.splitsnap.data.local.toMap
+import com.local.data.local.Member
+import com.local.data.local.MemberDao
+import com.local.data.local.toMap
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser

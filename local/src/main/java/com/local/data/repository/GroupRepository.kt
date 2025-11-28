@@ -1,13 +1,13 @@
-package com.splitsnap.data.repository
+package com.local.data.repository
 
-import com.splitsnap.data.local.Expense
-import com.splitsnap.data.local.ExpenseDao
-import com.splitsnap.data.local.Group
-import com.splitsnap.data.local.GroupDao
-import com.splitsnap.data.local.Member
-import com.splitsnap.data.local.MemberDao
-import com.splitsnap.data.local.toMap
-import com.splitsnap.utils.MEMBER_COLLECTION
+import com.local.data.MEMBER_COLLECTION
+import com.local.data.local.Expense
+import com.local.data.local.ExpenseDao
+import com.local.data.local.Group
+import com.local.data.local.GroupDao
+import com.local.data.local.Member
+import com.local.data.local.MemberDao
+import com.local.data.local.toMap
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore

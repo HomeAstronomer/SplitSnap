@@ -1,4 +1,4 @@
-package com.splitsnap.data.repository
+package com.local.data.repository
 
 sealed class DataState<out R> {
     data class Success<out T>(val data:T):DataState<T>()

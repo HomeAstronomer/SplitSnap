@@ -51,8 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
-import com.splitsnap.data.local.Expense
-import com.splitsnap.data.local.Member
+import com.local.data.local.Expense
+import com.local.data.local.Member
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest

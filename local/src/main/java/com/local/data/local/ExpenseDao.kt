@@ -1,8 +1,7 @@
-package com.splitsnap.data.local
+package com.local.data.local
 
 import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.compose.runtime.Stable
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Entity
@@ -21,7 +20,6 @@ const val EXPENSE_TABLE="expense_table"
 
 @Keep
 @Parcelize
-@Stable
 @Entity(tableName = EXPENSE_TABLE,
     indices = [Index(value = ["groupId"])])
 data class Expense(

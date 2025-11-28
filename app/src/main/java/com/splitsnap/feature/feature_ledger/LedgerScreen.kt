@@ -58,9 +58,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.splitsnap.data.local.Expense
-import com.splitsnap.data.local.Group
-import com.splitsnap.data.local.Member
+import com.local.data.local.Expense
+import com.local.data.local.Group
+import com.local.data.local.Member
 import com.splitsnap.navigation.AddMemberDialogRoute
 import com.splitsnap.navigation.HeatMapRoute
 import java.text.SimpleDateFormat

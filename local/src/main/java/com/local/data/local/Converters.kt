@@ -1,4 +1,4 @@
-package com.splitsnap.data.local
+package com.local.data.local
 
 import androidx.room.TypeConverter
 import com.google.firebase.Timestamp

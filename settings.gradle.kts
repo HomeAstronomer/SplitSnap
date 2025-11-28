@@ -28,4 +28,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "splitsnap"
 include(":app")
- 
+include(":local")

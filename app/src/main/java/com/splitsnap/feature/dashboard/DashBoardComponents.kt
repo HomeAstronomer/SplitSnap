@@ -1,26 +1,16 @@
 package com.splitsnap.feature.dashboard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.HourglassBottom
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.splitsnap.data.local.Group
+import com.local.data.local.Group
 import com.splitsnap.atoms.ImageCompose
 import java.text.SimpleDateFormat
 import java.util.*
@@ -63,7 +53,8 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Group Name
                 Text(
                     text = group.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -71,7 +62,8 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Members Count
                 Text(
                     text = "${group.members.size} members",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

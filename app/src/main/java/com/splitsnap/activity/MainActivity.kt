@@ -37,11 +37,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val isLoggedIn= Firebase.auth.currentUser
 
-            installSplashScreen().apply {
-                setKeepOnScreenCondition {
-                    false
-                }
-            }
+            installSplashScreen()
 
             splitsnapTheme {
                 NavHostInitializer(navController, isLoggedIn)

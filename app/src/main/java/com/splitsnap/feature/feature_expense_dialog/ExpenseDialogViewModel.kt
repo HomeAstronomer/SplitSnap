@@ -3,8 +3,8 @@ package com.splitsnap.feature.feature_expense_dialog
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.splitsnap.data.local.Expense
-import com.splitsnap.data.local.Member
+import com.local.data.local.Expense
+import com.local.data.local.Member
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

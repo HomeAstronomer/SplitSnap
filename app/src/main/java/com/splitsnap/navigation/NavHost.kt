@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
-import com.splitsnap.data.local.Member
+import com.local.data.local.Member
 import com.splitsnap.feature.dashboard.DashBoard
 import com.splitsnap.feature.feature_add_member.AddMemberDialog
 import com.splitsnap.feature.feature_create_group.CreateGroupScreen

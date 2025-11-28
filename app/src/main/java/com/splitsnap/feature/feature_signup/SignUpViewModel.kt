@@ -3,8 +3,8 @@ package com.splitsnap.feature.feature_signup
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.splitsnap.data.repository.DataState
-import com.splitsnap.data.repository.MemberRepository
+import com.local.data.repository.DataState
+import com.local.data.repository.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
