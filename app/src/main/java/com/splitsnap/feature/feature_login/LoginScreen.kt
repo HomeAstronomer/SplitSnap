@@ -315,7 +315,7 @@ fun signInWithGoogle(
         }
     }.addOnFailureListener { e ->
         showLoader.invoke(false)
-        Log.e("SignIn", "One Tap sign-in failed: ${e.localizedMessage}")
+        Log.e("SignIn", "One Tap sign-in failed: ${e.message}")
     }
 }
 

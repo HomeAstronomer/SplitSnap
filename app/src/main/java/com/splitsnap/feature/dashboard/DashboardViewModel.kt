@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.local.data.local.Group
 import com.local.data.local.Member
 import com.local.data.repository.DataState
-import com.local.data.repository.GroupRepository
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.group.GroupRepository
+import com.local.data.repository.member.MemberRepository
 import com.google.firebase.Timestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -52,8 +52,8 @@ class DashboardViewModel @Inject constructor(
 
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
-            memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+            memberRepository.getLoggedInMember().collect { memberList ->
+                memberList?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
                     getGroupsApiCall()
 

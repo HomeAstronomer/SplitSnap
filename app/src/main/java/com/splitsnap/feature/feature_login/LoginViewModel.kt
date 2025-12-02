@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.local.data.repository.DataState
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,6 +58,15 @@ class LoginViewModel @Inject constructor(
                             )
                         }
                     }
+
+                    DataState.Loading ->{
+                        _uiState.update {
+                        it.copy(
+                            showToast = true,
+                            showLoader = false
+                        )
+                    }
+                    }
                 }
             }
 
@@ -99,6 +108,16 @@ class LoginViewModel @Inject constructor(
                             )
                         }
                     }
+
+                    DataState.Loading -> {
+                        _uiState.update {
+                            it.copy (
+                                showToast = true,
+                                showLoader = false
+                            )
+                        }
+                    }
+
                 }
 
             }

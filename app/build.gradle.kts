@@ -17,16 +17,6 @@ plugins {
 
 android {
 
-    signingConfigs {
-        create("debugg") {
-            if (project.hasProperty("debugKeystore")) {
-                storeFile = file(project.property("debugKeystore").toString())
-                storePassword = project.property("debugKeystorePassword").toString()
-                keyAlias = project.property("debugKeyAlias").toString()
-                keyPassword = project.property("debugKeyPassword").toString()
-            }
-        }
-    }
     namespace = "com.splitsnap"
     compileSdk = 35
 
@@ -46,9 +36,6 @@ android {
     }
 
     buildTypes {
-        debug{
-            signingConfig = signingConfigs.getByName("debugg")
-        }
         release {
             isMinifyEnabled = true
             proguardFiles(

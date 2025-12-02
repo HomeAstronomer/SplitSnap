@@ -1,4 +1,4 @@
-package com.splitsnap
+package com.local.data.di
 
 import android.content.Context
 import androidx.room.Room
@@ -20,16 +20,49 @@ import com.local.data.AppDatabase
 import com.local.data.local.ExpenseDao
 import com.local.data.local.GroupDao
 import com.local.data.local.MemberDao
+import com.local.data.repository.member.CustomMemberDataSource
+import com.local.data.repository.member.FirebaseMemberDataSource
+import com.local.data.repository.member.MemberApiService
+import com.local.data.repository.member.MemberDataSource
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
+abstract class DataSourceModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindMemberDataSource(impl: CustomMemberDataSource): MemberDataSource
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
 object ProviderModule {
+
+    private const val BASE_URL = "http://10.0.2.2:8080/"
+
+    @Singleton
+    @Provides
+    fun provideRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideMemberApiService(retrofit: Retrofit): MemberApiService {
+        return retrofit.create(MemberApiService::class.java)
+    }
 
     @Singleton
     @Provides

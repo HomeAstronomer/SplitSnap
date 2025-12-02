@@ -3,7 +3,7 @@ package com.splitsnap.feature.feature_splash
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,9 +35,9 @@ class SplashViewModel @Inject constructor(
     init {
         viewModelScope.launch (Dispatchers.IO){
             _uiState.update { it.copy(isLoading = true) }
-            memberRepository.getMemberDb().collect{member->
-                member.getOrNull(0)?.let{ noNullMember ->
-                    isLoggedIn=memberRepository.getMemberFromFirestore(noNullMember.uid)!=null
+            memberRepository.getLoggedInMember().collect{member->
+                member?.let{ _ ->
+                    isLoggedIn= true
                     _uiState.update { it.copy(isLoading = false) }
                 }
             }

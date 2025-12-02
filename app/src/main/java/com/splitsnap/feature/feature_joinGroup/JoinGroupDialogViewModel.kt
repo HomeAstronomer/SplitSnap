@@ -4,8 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.local.data.repository.DataState
-import com.local.data.repository.GroupRepository
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.group.GroupRepository
+import com.local.data.repository.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +42,7 @@ class JoinGroupDialogViewModel @Inject constructor(
 
     fun joinGroup(groupId: String, onSuccess: () -> Unit) {
         viewModelScope.launch (Dispatchers.IO){
-            val member=memberRepository.getMemberDb().first().firstOrNull()
+            val member=memberRepository.getLoggedInMember().first()
             member?.let {memberFromDB->
                 groupRepository.joinGroup(member = memberFromDB, groupId = groupId).collect { dataState ->
                     _uiState.update { it.copy(showLoader = false) }

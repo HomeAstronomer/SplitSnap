@@ -9,8 +9,8 @@ import com.splitsnap.navigation.LedgerRoute
 import com.local.data.local.Expense
 import com.local.data.local.Group
 import com.local.data.local.Member
-import com.local.data.repository.GroupRepository
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.group.GroupRepository
+import com.local.data.repository.member.MemberRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,8 +70,8 @@ class LedgerViewModel @Inject constructor(
         }
 
         viewModelScope.launch(Dispatchers.IO){
-            groupRepository.getExpenseFromGroupId(groupId).combine( memberRepository.getMemberDb()){expenses,member->
-                member.getOrNull(0)?.let {
+            groupRepository.getExpenseFromGroupId(groupId).combine( memberRepository.getLoggedInMember()){expenses,member->
+                member?.let {
                     val moneyStatus=calculateMoneyStatus(it, expenses)
                     _uiState.update { it.copy(moneyStatus = moneyStatus) }
                 }
@@ -80,8 +80,8 @@ class LedgerViewModel @Inject constructor(
     }
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
-            memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+            memberRepository.getLoggedInMember().collect { memberList ->
+                memberList?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
                 }
 

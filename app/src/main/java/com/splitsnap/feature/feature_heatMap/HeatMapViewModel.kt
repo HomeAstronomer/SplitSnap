@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.local.data.local.Expense
-import com.local.data.repository.GroupRepository
-import com.local.data.repository.MemberRepository
+import com.local.data.repository.group.GroupRepository
+import com.local.data.repository.member.MemberRepository
 import com.splitsnap.navigation.HeatMapRoute
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
