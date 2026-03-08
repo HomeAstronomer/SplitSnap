@@ -1,6 +1,7 @@
 package com.splitsnap.data.repository
 
 import android.util.Log
+import com.splitsnap.data.AppDatabase
 import com.splitsnap.data.local.Member
 import com.splitsnap.data.local.MemberDao
 import com.splitsnap.data.local.toMap
@@ -10,14 +11,17 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MemberRepository @Inject constructor(
+    private val appDatabase: AppDatabase,
     private val memberDao: MemberDao,
     private val fireStoreDb: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
@@ -158,6 +162,11 @@ class MemberRepository @Inject constructor(
         }
     }
 
-
+    suspend fun logout() {
+        withContext(Dispatchers.IO) {
+            appDatabase.clearAllTables()
+        }
+        firebaseAuth.signOut()
+    }
 
 }

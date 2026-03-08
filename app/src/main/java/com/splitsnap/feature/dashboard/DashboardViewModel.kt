@@ -83,6 +83,13 @@ class DashboardViewModel @Inject constructor(
         return groupRepository.getNewGroupId()
     }
 
+    fun logout(onLogoutSuccess: () -> Unit) {
+        viewModelScope.launch {
+            memberRepository.logout()
+            onLogoutSuccess()
+        }
+    }
+
     fun createGroup() {
         _uiState.update { it.copy(showLoader = true) }
         viewModelScope.launch(Dispatchers.IO) {

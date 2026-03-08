@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -28,15 +29,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SettingsSuggest
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -48,12 +52,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,6 +71,7 @@ import com.splitsnap.data.local.Member
 import com.splitsnap.navigation.CreateGroupRoute
 import com.splitsnap.navigation.JoinGroupDialogRoute
 import com.splitsnap.navigation.LedgerRoute
+import com.splitsnap.navigation.LoginScreenRoute
 import com.splitsnap.utils.ifNullOrEmpty
 import com.google.firebase.Timestamp
 import java.util.Date
@@ -80,7 +87,14 @@ fun DashBoard(dashBoardViewModel: DashboardViewModel, navController: NavHostCont
             .imePadding(),
         topBar = {
             DashboardHeader(uiState.member,
-                { navController.navigate(CreateGroupRoute) },
+                createGroup = { navController.navigate(CreateGroupRoute) },
+                onLogout = {
+                    dashBoardViewModel.logout {
+                        navController.navigate(LoginScreenRoute) {
+                            popUpTo(0)
+                        }
+                    }
+                },
                 navController = navController
             )
         },
@@ -119,36 +133,25 @@ fun DashBoardContent(
     groupList: List<Group> = emptyList(),
     navigateGroup: (String) -> Unit,
 ) {
-    val context=LocalContext.current
-    var showApplinkDialog = remember{ mutableStateOf(false) }
+    val context = LocalContext.current
+    var showApplinkDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        if(Build.VERSION.SDK_INT>=31) {
+        if (Build.VERSION.SDK_INT >= 31) {
             val manager = context.getSystemService(DomainVerificationManager::class.java)
             val userState = manager.getDomainVerificationUserState(context.packageName)
 
-// Domains that have passed Android App Links verification.
-            val verifiedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED }
-
-// Domains that haven't passed Android App Links verification but that the user
-// has associated with an app.
-            val selectedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_SELECTED }
-
-// All other domains.
             val unapprovedDomains = userState?.hostToStateMap
                 ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
-            if(unapprovedDomains?.isNotEmpty()==true){
-                showApplinkDialog.value=true
+            if (unapprovedDomains?.isNotEmpty() == true) {
+                showApplinkDialog.value = true
 
             }
-            Log.i("AppLinks","verifiedDomains:- $verifiedDomains \nselectedDomains: $selectedDomains \nunapprovedDomain:- $unapprovedDomains ")
         }
     }
     Box(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 item {
                     Row(
                         Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
@@ -162,8 +165,8 @@ fun DashBoardContent(
                             style = MaterialTheme.typography.headlineMedium,
                         )
 
-                        Icon(imageVector = Icons.Rounded.Replay, // Replace with your icon resource
-                            contentDescription = "Refresh Group", // Replace with your string resource
+                        Icon(imageVector = Icons.Rounded.Replay,
+                            contentDescription = "Refresh Group",
                             modifier = Modifier
                                 .size(24.dp)
                                 .clickable {
@@ -182,7 +185,15 @@ fun DashBoardContent(
 
             }
 
-
+//            Text(
+//                text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(16.dp),
+//                textAlign = TextAlign.Center,
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
         }
     }
     AnimatedVisibility(showApplinkDialog.value) {
@@ -208,7 +219,7 @@ fun DashBoardContent(
                         )
                         context.startActivity(intent)
 
-                        showApplinkDialog.value=false
+                        showApplinkDialog.value = false
                     }
                 ) {
                     Text("Go to Settings")
@@ -231,8 +242,10 @@ fun DashBoardContent(
 
 @Composable
 fun DashboardHeader(
-    route: Member?, createGroup: () -> Unit, navController: NavHostController
+    route: Member?, createGroup: () -> Unit, onLogout: () -> Unit, navController: NavHostController
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -258,15 +271,15 @@ fun DashboardHeader(
                     contentDescription = "",
                     loading = {
                         Icon(
-                            imageVector = Icons.Rounded.AccountCircle, // Replace with your icon resource
-                            contentDescription = "Create Group", // Replace with your string resource
+                            imageVector = Icons.Rounded.AccountCircle,
+                            contentDescription = "User Avatar",
                             modifier = Modifier.size(64.dp)
                         )
                     },
                     error = {
                         Icon(
-                            imageVector = Icons.Rounded.AccountCircle, // Replace with your icon resource
-                            contentDescription = "Create Group", // Replace with your string resource
+                            imageVector = Icons.Rounded.AccountCircle,
+                            contentDescription = "User Avatar",
                             modifier = Modifier.size(64.dp)
                         )
                     },
@@ -275,29 +288,45 @@ fun DashboardHeader(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = route?.displayName ?: "No Name",
                         style = MaterialTheme.typography.headlineMedium,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = route?.email ?: "No Email",
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = route?.phoneNumber?.ifNullOrEmpty { "No Phone Number" }
                             ?: "No Phone Number",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Logout") },
+                            onClick = {
+                                showMenu = false
+                                onLogout()
+                            }
+                        )
+                    }
+                }
             }
 
             Row(
-
-
-                modifier = Modifier.padding(top=16.dp),
+                modifier = Modifier.padding(top = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
@@ -376,7 +405,7 @@ fun DashboardContentPreview() {
                 members = emptyList(),
                 createdAt = Timestamp(Date()),
                 updatedAt = Timestamp(Date()),
-                groupImg = "https://example.com/sample-group-img.jpg" // Replace with a valid image URL
+                groupImg = "https://example.com/sample-group-img.jpg"
             )
         ), navigateGroup = {}
         )
