@@ -31,17 +31,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                false
+            }
+        }
         setContent {
 
 
             val navController = rememberNavController()
             val isLoggedIn= Firebase.auth.currentUser
 
-            installSplashScreen().apply {
-                setKeepOnScreenCondition {
-                    false
-                }
-            }
+
 
             splitsnapTheme {
                 NavHostInitializer(navController, isLoggedIn)
