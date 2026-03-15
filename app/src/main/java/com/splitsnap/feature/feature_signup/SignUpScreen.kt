@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -198,6 +199,20 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel, navController: NavHostControl
             }
 
 
+        }
+
+        if (uiState.showLoader) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))
+            ) {
+                CircularProgressIndicator(
+                    Modifier
+                        .size(64.dp)
+                        .align(Alignment.Center), strokeWidth = 8.dp
+                )
+            }
         }
     }
 

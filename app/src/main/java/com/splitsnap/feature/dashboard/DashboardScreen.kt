@@ -48,10 +48,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +64,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
@@ -134,21 +139,47 @@ fun DashBoardContent(
     navigateGroup: (String) -> Unit,
 ) {
     val context = LocalContext.current
-    var showApplinkDialog = remember { mutableStateOf(false) }
+    var showApplinkDialog by remember { mutableStateOf(false) }
+    var isLinkDialogShown by rememberSaveable { mutableStateOf(false) }
+    var isApplinkingEnabled by remember{mutableStateOf(true)}
 
-    LaunchedEffect(Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun checkAppLinks() {
         if (Build.VERSION.SDK_INT >= 31) {
+
             val manager = context.getSystemService(DomainVerificationManager::class.java)
             val userState = manager.getDomainVerificationUserState(context.packageName)
 
-            val unapprovedDomains = userState?.hostToStateMap
-                ?.filterValues { it == DomainVerificationUserState.DOMAIN_STATE_NONE }
-            if (unapprovedDomains?.isNotEmpty() == true) {
-                showApplinkDialog.value = true
+            val enabledDomains = userState?.hostToStateMap?.filterValues {
+                it == DomainVerificationUserState.DOMAIN_STATE_VERIFIED ||
+                        it == DomainVerificationUserState.DOMAIN_STATE_SELECTED
+            }
 
+            isApplinkingEnabled = enabledDomains?.isNotEmpty() == true
+
+            if (!isApplinkingEnabled && !isLinkDialogShown) {
+                showApplinkDialog = true
+                isLinkDialogShown = true
             }
         }
     }
+
+    DisposableEffect(lifecycleOwner) {
+
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                checkAppLinks()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Box(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             LazyColumn(modifier = Modifier.weight(1f)) {
@@ -195,8 +226,15 @@ fun DashBoardContent(
 //                color = MaterialTheme.colorScheme.onSurfaceVariant
 //            )
         }
+        AnimatedVisibility (!isApplinkingEnabled,modifier=Modifier.align (Alignment.BottomCenter)) {
+            TextButton(onClick = {
+                showApplinkDialog = true
+            }) { Text("App Linking Not Enabled") }
+        }
     }
-    AnimatedVisibility(showApplinkDialog.value) {
+
+
+    AnimatedVisibility(showApplinkDialog) {
         AlertDialog(
             icon = {
                 Icon(Icons.Default.SettingsSuggest, contentDescription = "Example Icon")
@@ -208,7 +246,7 @@ fun DashBoardContent(
                 Text(text = "To provide a seamless experience, please allow this app to open links automatically from your system settings. After that, click on 'Add Link' to set the default")
             },
             onDismissRequest = {
-                showApplinkDialog.value = false
+                showApplinkDialog = false
             },
             confirmButton = {
                 TextButton(
@@ -219,7 +257,7 @@ fun DashBoardContent(
                         )
                         context.startActivity(intent)
 
-                        showApplinkDialog.value = false
+                        showApplinkDialog = false
                     }
                 ) {
                     Text("Go to Settings")
@@ -228,7 +266,7 @@ fun DashBoardContent(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        showApplinkDialog.value = false
+                        showApplinkDialog = false
                     }
                 ) {
                     Text("Dismiss")

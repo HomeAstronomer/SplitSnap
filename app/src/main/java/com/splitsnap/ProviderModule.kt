@@ -83,7 +83,7 @@ object ProviderModule {
         val sexuallyExplicit = SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, HarmBlockThreshold.NONE)
         val hateSpeech = SafetySetting(HarmCategory.HATE_SPEECH, HarmBlockThreshold.NONE)
         val harassment = SafetySetting(HarmCategory.HARASSMENT, HarmBlockThreshold.NONE)
-        return   com.google.firebase.Firebase.vertexAI.generativeModel("gemini-1.5-flash",generationConfig = generationConfig {
+        return   com.google.firebase.Firebase.vertexAI.generativeModel("gemini-2.5-flash",generationConfig = generationConfig {
             responseMimeType = "application/json"
             responseSchema = transactionSchema
         },

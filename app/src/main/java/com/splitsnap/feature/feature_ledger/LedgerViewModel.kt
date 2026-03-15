@@ -107,28 +107,38 @@ class LedgerViewModel @Inject constructor(
         val moneyToBeSpentMap= mutableMapOf<String, Float>()
 
         for (expense in expenses){
-            val share=expense.amount.toFloat()/expense.splitAmong.size
-            if(expense.paidBy.uid==member.uid){
-                for(memberLoop in expense.splitAmong) {
-                    if(memberLoop.uid!=member.uid){
-                        val moneyToBeSentToUser=moneyToBeSpentMap.getOrDefault(memberLoop.uid,0.0f)
-                        val moneyToBeRecievedFromUser=moneyToBeRecievdMap.getOrDefault(memberLoop.uid,0.0f)+ share
-                        if(moneyToBeSentToUser>moneyToBeRecievedFromUser){
-                            moneyToBeSpentMap[memberLoop.uid]=moneyToBeSentToUser-moneyToBeRecievedFromUser
-                        }else{
-                            moneyToBeRecievdMap[memberLoop.uid]=moneyToBeRecievedFromUser-moneyToBeSentToUser
+            if(expense.splitAmong.any{it.uid==member.uid}) {
+                val share = expense.amount.toFloat() / expense.splitAmong.size
+                if (expense.paidBy.uid == member.uid) {
+                    for (memberLoop in expense.splitAmong) {
+                        if (memberLoop.uid != member.uid) {
+                            val moneyToBeSentToUser =
+                                moneyToBeSpentMap.getOrDefault(memberLoop.uid, 0.0f)
+                            val moneyToBeRecievedFromUser =
+                                moneyToBeRecievdMap.getOrDefault(memberLoop.uid, 0.0f) + share
+                            if (moneyToBeSentToUser > moneyToBeRecievedFromUser) {
+                                moneyToBeSpentMap[memberLoop.uid] =
+                                    moneyToBeSentToUser - moneyToBeRecievedFromUser
+                            } else {
+                                moneyToBeRecievdMap[memberLoop.uid] =
+                                    moneyToBeRecievedFromUser - moneyToBeSentToUser
+                            }
                         }
                     }
-                }
-            }else{
-                val moneyToBeSentToUser=moneyToBeSpentMap.getOrDefault(expense.paidBy.uid,0.0f)+ share
-                val moneyToBeRecievedFromUser=moneyToBeRecievdMap.getOrDefault(expense.paidBy.uid,0.0f)
-                if(moneyToBeSentToUser>moneyToBeRecievedFromUser){
-                    moneyToBeSpentMap[expense.paidBy.uid]=moneyToBeSentToUser-moneyToBeRecievedFromUser
-                }else{
-                    moneyToBeRecievdMap[expense.paidBy.uid]=moneyToBeRecievedFromUser-moneyToBeSentToUser
-                }
+                } else {
+                    val moneyToBeSentToUser =
+                        moneyToBeSpentMap.getOrDefault(expense.paidBy.uid, 0.0f) + share
+                    val moneyToBeRecievedFromUser =
+                        moneyToBeRecievdMap.getOrDefault(expense.paidBy.uid, 0.0f)
+                    if (moneyToBeSentToUser > moneyToBeRecievedFromUser) {
+                        moneyToBeSpentMap[expense.paidBy.uid] =
+                            moneyToBeSentToUser - moneyToBeRecievedFromUser
+                    } else {
+                        moneyToBeRecievdMap[expense.paidBy.uid] =
+                            moneyToBeRecievedFromUser - moneyToBeSentToUser
+                    }
 
+                }
             }
         }
         val moneyToBeRecieved=moneyToBeRecievdMap.values.sum()

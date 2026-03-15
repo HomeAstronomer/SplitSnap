@@ -17,7 +17,8 @@ import javax.inject.Inject
 @Immutable
 data class SignUpScreenUIState(
     val showToast:Boolean=false,
-    val toastMessage:String=""
+    val toastMessage:String="",
+    val showLoader:Boolean=false
 
 )
 
@@ -43,15 +44,20 @@ class SignUpViewModel @Inject constructor(
 
 
         viewModelScope.launch {
+            _uiState.update { it.copy(showLoader = true) }
+
             memberRepository.signup(email, password, displayName, phoneNumber).collect { dataState ->
                 when (dataState) {
                     is DataState.Success -> {
+                        _uiState.update { it.copy(showLoader = false) }
+
                         onSuccess.invoke()
                     }
 
                     is DataState.Error -> {
                         _uiState.update {
                             it.copy(
+                                showLoader = false,
                                 showToast = true,
                                 toastMessage = dataState.errorMessage
                             )

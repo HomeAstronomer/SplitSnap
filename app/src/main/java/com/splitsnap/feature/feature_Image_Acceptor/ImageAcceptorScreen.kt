@@ -1,12 +1,18 @@
 package com.splitsnap.feature.feature_Image_Acceptor
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,44 +23,53 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -70,13 +85,22 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.google.firebase.Timestamp
+import com.splitsnap.atoms.ImageCompose
+import com.splitsnap.data.local.Expense
+import com.splitsnap.data.local.Group
+import com.splitsnap.data.local.Member
+import com.splitsnap.feature.feature_expense_dialog.LocationButton
 import com.splitsnap.utils.drawableToBitmap
 import com.splitsnap.utils.formatToDate
 import com.splitsnap.utils.formatToIsoString
 import com.splitsnap.utils.updateDateFromMillis
 import com.splitsnap.utils.updateTimeFromMillis
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import kotlin.collections.set
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,56 +109,88 @@ fun ImageAcceptorScreen(
     imageUri: String, imageAcceptorViewModel: ImageAcceptorViewModel
 ) {
     val context = LocalContext.current
-    val loader = ImageLoader(context)
-    val request = ImageRequest.Builder(context).data(imageUri).build()
+    val coroutine = rememberCoroutineScope()
 
-    val painter = rememberAsyncImagePainter(
-        model = request
-    )
     val uiState by imageAcceptorViewModel.uiState.collectAsStateWithLifecycle()
     var recognizedText by remember { mutableStateOf("") }
 
-    var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    LaunchedEffect(request) {
-        val result = (loader.execute(request) as? SuccessResult)?.drawable
-        imageBitmap = drawableToBitmap(result)
-        imageBitmap?.let { bitmap ->
-            recognizedText = imageAcceptorViewModel.detectImageData(bitmap)
-        }
-    }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "background")
-    val targetOffset = with(LocalDensity.current) {
-        5000.dp.toPx()
-    }
-    val offset by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
-            tween(50000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
-        ), label = "offset"
+    val bottomSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(skipHiddenState = false)
     )
-    val brushColors = listOf(Color(0xff7057f5).copy(0.4f), Color(0xff86f7fa).copy(alpha = 0.4f))
-    val bottomSheetState = rememberBottomSheetScaffoldState()
     LaunchedEffect(recognizedText.isEmpty()) {
-        if(recognizedText.isNotBlank()){
+        if (recognizedText.isNotBlank()) {
             bottomSheetState.bottomSheetState.expand()
         }
     }
-    BottomSheetScaffold(modifier= Modifier.background(Color.Transparent),
+    var saveExpenseBottomSheet by remember { mutableStateOf(false) }
+    val clickedGroups = rememberSaveable { mutableStateOf<Group?>(null) }
+
+
+    BottomSheetScaffold(
+        modifier = Modifier.background(Color.Transparent),
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
         sheetContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-        scaffoldState = bottomSheetState,sheetContent = {
-        if (recognizedText.isEmpty()) {
-            Text(
-                text = "Recognizing Text ... ", style = MaterialTheme.typography.bodyMedium
-            )
+        scaffoldState = bottomSheetState, sheetContent = {
+            if (recognizedText.isEmpty()) {
+                Text(
+                    modifier = Modifier.padding(24.dp),
+                    text = "Recognizing Text ... ", style = MaterialTheme.typography.bodyMedium
+                )
 
-        } else {
-            uiState.transactionDetails?.let {
-                EditTransactionDetails(it, imageAcceptorViewModel::setTransactionModel)
+            } else {
+                uiState.transactionDetails?.let {
+                    Column(Modifier.padding(24.dp)) {
+                        Text(
+                            modifier = Modifier.padding(24.dp),
+                            text = "Select a group to add expense to", style = MaterialTheme.typography.bodyMedium
+                        )
+                        uiState.groupList.forEach {
+                            Row() {
+                                TextButton({
+                                    saveExpenseBottomSheet=true
+                                    clickedGroups.value = it
+                                    coroutine.launch {
+                                        bottomSheetState.bottomSheetState.hide()
+                                    }
+                                },
+                                    modifier = Modifier.fillMaxWidth()) {
+                                    ImageCompose(
+                                        Modifier
+                                            .size(48.dp)
+                                            .background(
+                                                MaterialTheme.colorScheme.surfaceContainer,
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                            .clip(RoundedCornerShape(12.dp)),
+                                        data = it.groupImg
+                                    )
+                                    Text(it.name, modifier = Modifier.weight(1f).padding(start = 8.dp))
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        imageVector = Icons.AutoMirrored.Default.NavigateNext,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        }
-    }) {
+        }) {
         if (recognizedText.isEmpty()) {
+            val infiniteTransition = rememberInfiniteTransition(label = "background")
+            val targetOffset = with(LocalDensity.current) {
+                5000.dp.toPx()
+            }
+            val offset by infiniteTransition.animateFloat(
+                initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
+                    tween(50000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
+                ), label = "offset"
+            )
+            val brushColors = listOf(Color(0xff7057f5).copy(0.4f), Color(0xff86f7fa).copy(alpha = 0.4f))
             Box(
                 Modifier
                     .fillMaxSize()
@@ -153,21 +209,59 @@ fun ImageAcceptorScreen(
 
                     })
         }
-            Box(
-                modifier = Modifier.fillMaxSize()
-                    .background(Color.Transparent), contentAlignment = Alignment.Center
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent), contentAlignment = Alignment.Center
+        ) {
+            Box(Modifier.padding(48.dp)) {
 
-                Box(Modifier.wrapContentSize()) {
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        modifier = Modifier.wrapContentSize().background(Color.Transparent)
+                val loader = ImageLoader(context)
+                val request = ImageRequest.Builder(context).data(imageUri).build()
+
+                val painter = rememberAsyncImagePainter(
+                    model = request
+                )
+                var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
+                LaunchedEffect(request) {
+                    val result = (loader.execute(request) as? SuccessResult)?.drawable
+                    imageBitmap = drawableToBitmap(result)
+                    imageBitmap?.let { bitmap ->
+                        recognizedText = imageAcceptorViewModel.detectImageData(bitmap)
+                    }
+                }
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .background(Color.Transparent)
+                )
+            }
+            AnimatedVisibility(
+                visible = saveExpenseBottomSheet,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+                enter = slideInVertically(
+                    initialOffsetY = { it }
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { it }
+                ) + fadeOut()
+            ) {
+                uiState.transactionDetails?.let {
+                    EditTransactionDetails(
+                        initialDetails = it,
+                        clickedGroup = clickedGroups.value!!,
+                        onSave = { expense, group ->
+                            imageAcceptorViewModel.setExpense(
+                                expense,
+                                group,
+                                onDone = { saveExpenseBottomSheet = false })
+                        }
                     )
                 }
-
-
-
+            }
         }
     }
 }
@@ -175,7 +269,9 @@ fun ImageAcceptorScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionDetails(
-    initialDetails: TransactionDetails, onSave: (TransactionDetails) -> Unit
+    initialDetails: TransactionDetails,
+    clickedGroup: Group,
+    onSave: (Expense, Group) -> Unit,
 ) {
     var receiverName by remember { mutableStateOf(initialDetails.receiver.name) }
     var receiverUpiId by remember { mutableStateOf(initialDetails.receiver.upiId) }
@@ -184,9 +280,15 @@ fun EditTransactionDetails(
     var transactionId by remember { mutableStateOf(initialDetails.transactionId) }
     var platform by remember { mutableStateOf(initialDetails.platform) }
     val scrollState = rememberScrollState()
+    var latitude by remember { mutableStateOf(0.0) }
+    var longitude by remember { mutableStateOf(0.0) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.secondaryContainer,
+                RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            )
             .padding(16.dp)
             .scrollable(scrollState, orientation = Orientation.Vertical),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -194,22 +296,40 @@ fun EditTransactionDetails(
     ) {
 
         TransactionTimePicker(initialTime = initialDetails.time, updateDate = { time = it })
+        var isLocationEmpty by remember { mutableStateOf(true) }
+        AnimatedContent(isLocationEmpty) {
+            if (it){
+                LocationButton { lat, lon ->
+                    isLocationEmpty=false
+                    latitude = lat
+                    longitude = lon
+                    // You can now use latitude and longitude in your expense message
+                }
+            }else{
+                Text("Latitude: $latitude, Longitude: $longitude")
+            }
+        }
+
+
         // Receiver Name
-        OutlinedTextField(value = receiverName,
+        OutlinedTextField(
+            value = receiverName,
             onValueChange = { receiverName = it },
             label = { Text("Receiver Name") },
             modifier = Modifier.fillMaxWidth()
         )
 
         // Receiver UPI ID
-        OutlinedTextField(value = receiverUpiId,
+        OutlinedTextField(
+            value = receiverUpiId,
             onValueChange = { receiverUpiId = it },
             label = { Text("Receiver UPI ID") },
             modifier = Modifier.fillMaxWidth()
         )
 
         // Amount
-        OutlinedTextField(value = amount,
+        OutlinedTextField(
+            value = amount,
             onValueChange = { amount = it },
             label = { Text("Amount") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -220,13 +340,15 @@ fun EditTransactionDetails(
 
 
         // Transaction ID
-        OutlinedTextField(value = transactionId,
+        OutlinedTextField(
+            value = transactionId,
             onValueChange = { transactionId = it },
             label = { Text("Transaction ID") },
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(value = platform,
+        OutlinedTextField(
+            value = platform,
             onValueChange = { platform = it },
             label = { Text("Platform") },
             modifier = Modifier.fillMaxWidth()
@@ -234,19 +356,53 @@ fun EditTransactionDetails(
 
         // Platform
 
+        val splitAmongMap = remember {
+            mutableStateMapOf<Member, Boolean>().apply {
+                clickedGroup.members.forEach { member ->
+                    this[member] = false
+                }
+            }
+        }
+
+
+        LazyColumn(Modifier.padding(bottom = 16.dp)) {
+            items(splitAmongMap.keys.toList()) { item ->
+                Row(
+                    Modifier, verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val isSelected = remember(splitAmongMap.values) {
+                        derivedStateOf {
+                            splitAmongMap[item]
+                        }
+                    }
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = item.displayName ?: "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Checkbox(
+                        checked = isSelected.value ?: false,
+                        onCheckedChange = { splitAmongMap.set(item, it) })
+                }
+
+            }
+        }
 
         // Save Button
         Button(
             onClick = {
-                onSave(
-                    TransactionDetails(
-                        receiver = Receiver(name = receiverName, upiId = receiverUpiId),
-                        amount = amount.toDoubleOrNull() ?: 0.0,
-                        time = time,
-                        transactionId = transactionId,
-                        platform = platform
-                    )
+                val expense = Expense(
+                    "", description = transactionId,
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    splitAmong = splitAmongMap.toMap()
+                        .filter { it.value }.keys.toList(),
+                    createdAt = Timestamp(formatToDate(time)),
+                    groupId = clickedGroup.id,
+                    latitude = latitude,
+                    longitude = longitude
                 )
+                onSave.invoke(expense, clickedGroup)
             }, modifier = Modifier
         ) {
             Text("Save")
@@ -291,7 +447,7 @@ fun TransactionTimePicker(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                 fontWeight = FontWeight.Bold,
-                modifier=Modifier
+                modifier = Modifier
             )
         }
         // Date Picker
@@ -304,8 +460,7 @@ fun TransactionTimePicker(
                 .clip(RoundedCornerShape(16.dp))
                 .clickable { showTimePicker = true }
                 .background(MaterialTheme.colorScheme.tertiaryContainer)
-                .padding(8.dp)
-            ,
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -321,7 +476,7 @@ fun TransactionTimePicker(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                 fontWeight = FontWeight.Bold,
-                modifier=Modifier
+                modifier = Modifier
             )
         }
     }
@@ -334,19 +489,25 @@ fun TransactionTimePicker(
             Box(
                 Modifier
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(24.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(24.dp)
+                    )
 
             ) {
-                Column(Modifier.padding(16.dp),
+                Column(
+                    Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     TimePicker(
                         modifier = Modifier,
                         state = timePickerState
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                    ) {
                         Button(
                             modifier = Modifier.weight(0.5f),
                             onClick = { showTimePicker = false }) {
@@ -376,22 +537,30 @@ fun TransactionTimePicker(
             Box(
                 Modifier
                     .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(24.dp))
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(24.dp)
+                    )
 
             ) {
-                Column(Modifier.padding(16.dp),
+                Column(
+                    Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     DatePicker(
                         state = datePickerState, showModeToggle = false
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier)  {
-                        Button(modifier=Modifier.weight(0.5f),onClick = { showDatePicker = false }) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                    ) {
+                        Button(
+                            modifier = Modifier.weight(0.5f),
+                            onClick = { showDatePicker = false }) {
                             Text("Dismiss")
                         }
-                        Button(modifier=Modifier.weight(0.5f),onClick = {
+                        Button(modifier = Modifier.weight(0.5f), onClick = {
                             showDatePicker = false
                             datePickerState.selectedDateMillis?.let {
                                 date = date.updateDateFromMillis(it)
