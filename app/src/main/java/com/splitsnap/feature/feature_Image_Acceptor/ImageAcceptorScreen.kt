@@ -1,5 +1,6 @@
 package com.splitsnap.feature.feature_Image_Acceptor
 
+import android.app.Activity
 import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -85,8 +86,14 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.firebase.Timestamp
+import com.splitsnap.R
 import com.splitsnap.atoms.ImageCompose
+import com.splitsnap.atoms.WaveGradient
 import com.splitsnap.data.local.Expense
 import com.splitsnap.data.local.Group
 import com.splitsnap.data.local.Member
@@ -96,11 +103,13 @@ import com.splitsnap.utils.formatToDate
 import com.splitsnap.utils.formatToIsoString
 import com.splitsnap.utils.updateDateFromMillis
 import com.splitsnap.utils.updateTimeFromMillis
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.collections.set
+import kotlin.time.Duration.Companion.seconds
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -131,12 +140,12 @@ fun ImageAcceptorScreen(
         modifier = Modifier.background(Color.Transparent),
         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
         sheetContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-        scaffoldState = bottomSheetState, sheetContent = {
+        scaffoldState = bottomSheetState,
+        sheetDragHandle = {},
+        sheetPeekHeight = 0.dp,
+        sheetContent = {
             if (recognizedText.isEmpty()) {
-                Text(
-                    modifier = Modifier.padding(24.dp),
-                    text = "Recognizing Text ... ", style = MaterialTheme.typography.bodyMedium
-                )
+
 
             } else {
                 uiState.transactionDetails?.let {
@@ -179,36 +188,8 @@ fun ImageAcceptorScreen(
                     }
                 }
             }
-        }) {
-        if (recognizedText.isEmpty()) {
-            val infiniteTransition = rememberInfiniteTransition(label = "background")
-            val targetOffset = with(LocalDensity.current) {
-                5000.dp.toPx()
-            }
-            val offset by infiniteTransition.animateFloat(
-                initialValue = 0f, targetValue = targetOffset, animationSpec = infiniteRepeatable(
-                    tween(50000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
-                ), label = "offset"
-            )
-            val brushColors = listOf(Color(0xff7057f5).copy(0.4f), Color(0xff86f7fa).copy(alpha = 0.4f))
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .blur(50.dp)
-                    .drawWithCache {
-                        val brushSize = 400f
-                        val brush = Brush.linearGradient(
-                            colors = brushColors,
-                            start = Offset(offset, offset),
-                            end = Offset(offset + brushSize, offset + brushSize),
-                            tileMode = TileMode.Mirror
-                        )
-                        onDrawBehind {
-                            drawRect(brush)
-                        }
+        },) {
 
-                    })
-        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -230,6 +211,7 @@ fun ImageAcceptorScreen(
                         recognizedText = imageAcceptorViewModel.detectImageData(bitmap)
                     }
                 }
+
                 Image(
                     painter = painter,
                     contentDescription = null,
@@ -237,6 +219,25 @@ fun ImageAcceptorScreen(
                         .wrapContentSize()
                         .background(Color.Transparent)
                 )
+            }
+            if (recognizedText.isEmpty()) {
+                WaveGradient()
+
+                val composition by rememberLottieComposition(
+                    LottieCompositionSpec.Asset("ai_stars.lottie")
+                )
+                Column() {
+                    LottieAnimation(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever,
+                        modifier = Modifier.size(200.dp)
+                    )
+                    Text(
+                        modifier = Modifier.padding(24.dp),
+                        text = "Recognizing Text ... ", style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
             }
             AnimatedVisibility(
                 visible = saveExpenseBottomSheet,
@@ -257,7 +258,12 @@ fun ImageAcceptorScreen(
                             imageAcceptorViewModel.setExpense(
                                 expense,
                                 group,
-                                onDone = { saveExpenseBottomSheet = false })
+                                onDone = { saveExpenseBottomSheet = false
+                                coroutine.launch {
+                                    delay(1.seconds)
+                                    (context as Activity).finish()
+                                }})
+
                         }
                     )
                 }
