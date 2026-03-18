@@ -287,7 +287,7 @@ fun DashboardHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
 

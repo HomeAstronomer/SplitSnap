@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,13 +39,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +63,10 @@ import com.splitsnap.data.local.Group
 import com.splitsnap.data.local.Member
 import com.splitsnap.navigation.AddMemberDialogRoute
 import com.splitsnap.navigation.HeatMapRoute
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -116,7 +119,7 @@ fun LedgerScreenInternal(
                 Column(
                     Modifier
                         .padding(padding)
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                 ) {
                     Row(
@@ -231,17 +234,25 @@ fun LedgerScreenInternal(
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
-            items(expense) { item ->
-                val isMe by remember {
-                    mutableStateOf(item.paidBy.uid == member?.uid)
-                }
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    horizontalArrangement = if (isMe) Arrangement.Start else Arrangement.End
-                ) {
-                    ExpenseCard(expense = item, isMe)
+            itemsIndexed(expense) { index, item ->
+                val currentDate = formatDateForSeparator(item.createdAt)
+                val previousDate = if (index > 0) formatDateForSeparator(expense[index - 1].createdAt) else null
+
+                Column {
+                    if (currentDate != previousDate) {
+                        DateSeparator(currentDate)
+                    }
+                    val isMe = remember(item.id, member?.uid) {
+                        item.paidBy.uid == member?.uid
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
+                    ) {
+                        ExpenseCard(expense = item, isMe)
+                    }
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -251,10 +262,53 @@ fun LedgerScreenInternal(
 }
 
 @Composable
+fun DateSeparator(date: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = date,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+fun formatDateForSeparator(timestamp: Timestamp): String {
+    val date = timestamp.toDate()
+    val fmt = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+    val today = fmt.format(Date())
+
+    val cal = Calendar.getInstance()
+    cal.add(Calendar.DAY_OF_YEAR, -1)
+    val yesterday = fmt.format(cal.time)
+
+    val expenseDate = fmt.format(date)
+
+    return when (expenseDate) {
+        today -> "Today"
+        yesterday -> "Yesterday"
+        else -> SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(date)
+    }
+}
+
+@Composable
 fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) {
     // Formatting date
     val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
     val formattedDate = dateFormat.format(expense.createdAt.toDate())
+
+    val containerColor = if (isMe) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = if (isMe) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
 
     Card(
         modifier = modifier
@@ -262,12 +316,12 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             .padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         val context = LocalContext.current
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = if (isMe) Alignment.Start else Alignment.End // Align based on isMe
+            horizontalAlignment = if (isMe) Alignment.Start else Alignment.Start // Align based on isMe
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -276,7 +330,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.AttachMoney,
                     contentDescription = "Amount",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = contentColor,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -284,14 +338,14 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "₹${expense.amount}",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = contentColor,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f))
+            HorizontalDivider(color = contentColor.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -299,7 +353,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = expense.description,
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = contentColor
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -308,7 +362,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = "Paid by: ${expense.paidBy.displayName}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = contentColor
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -317,12 +371,12 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
             Text(
                 text = "Split among: ${expense.splitAmong.joinToString(", ") { it.displayName ?: "" }}",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+                color = contentColor
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            HorizontalDivider(color = contentColor.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -334,7 +388,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.CalendarToday,
                     contentDescription = "Date",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = contentColor,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -342,13 +396,13 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "Created at: $formattedDate",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = contentColor
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Created At
+            // Location
             Row(
                 modifier = Modifier.clickable {
                     openLocationInMaps(context = context, expense.latitude, expense.longitude)
@@ -359,7 +413,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = "Date",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = contentColor,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -367,7 +421,7 @@ fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) 
                 Text(
                     text = "Location: ${expense.latitude}, ${expense.longitude}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = contentColor
 
                 )
             }
@@ -382,7 +436,7 @@ fun LedgerScreenHeader(
 ) {
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primaryContainer)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .fillMaxWidth()
             .statusBarsPadding()
             .padding(horizontal = 24.dp, vertical = 8.dp)
@@ -398,7 +452,8 @@ fun LedgerScreenHeader(
                     .clip(CircleShape)
                     .clickable {
                         backClick.invoke()
-                    })
+                    },
+                tint = MaterialTheme.colorScheme.onSecondaryContainer)
 //
 //            ImageCompose(
 //                Modifier
@@ -415,7 +470,8 @@ fun LedgerScreenHeader(
             Text(
                 modifier = Modifier
                     .padding(start = 16.dp),
-                text = group?.name ?: "", style = MaterialTheme.typography.titleLarge
+                text = group?.name ?: "", style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }

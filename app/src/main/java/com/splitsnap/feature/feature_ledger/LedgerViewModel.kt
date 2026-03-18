@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -63,7 +61,8 @@ class LedgerViewModel @Inject constructor(
         }
         viewModelScope.launch(Dispatchers.IO) {
            groupRepository.getExpenseFromGroupId(groupId).collect{expense->
-                _uiState.update { it.copy(expense = expense) }
+                val sortedExpenses = expense.sortedByDescending { it.createdAt }
+                _uiState.update { it.copy(expense = sortedExpenses) }
 
             }
         }
