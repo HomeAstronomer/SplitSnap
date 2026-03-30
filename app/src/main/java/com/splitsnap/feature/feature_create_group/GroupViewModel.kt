@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.lang.System
 import java.util.Date
 import javax.inject.Inject
 
@@ -51,7 +52,7 @@ class CreateGroupViewModel @Inject constructor(
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
             memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+                memberList?.getOrNull(0)?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
 
                 }
@@ -106,8 +107,8 @@ class CreateGroupViewModel @Inject constructor(
                     id = getNewGroupId(),
                     name = groupName,
                     members = listOf(it),
-                    createdAt = Timestamp(Date()),
-                    updatedAt = Timestamp(Date()),
+                    createdAt =  System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
                     groupImg = groupImage
                 )
                 groupRepository.createGroup(group, it.uid).collect { dataState ->

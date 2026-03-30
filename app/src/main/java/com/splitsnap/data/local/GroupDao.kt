@@ -17,7 +17,6 @@ import java.util.Date
 
 const val GROUP_TABLE="group_table"
 @Keep
-@Parcelize
 @Stable
 @Entity(tableName = GROUP_TABLE)
 data class Group(
@@ -25,10 +24,10 @@ data class Group(
     val id: String = "",
     val name: String = "",
     val members: List<Member> = emptyList(),  // Default value as an empty list
-    val createdAt: Timestamp = Timestamp(Date()),
-    val updatedAt: Timestamp = Timestamp(Date()),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
     val groupImg:String=""
-):Parcelable
+)
 
 
 fun Group.toMap(): Map<String, Any> {

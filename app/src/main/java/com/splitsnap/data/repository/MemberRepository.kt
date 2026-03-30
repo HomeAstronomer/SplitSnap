@@ -122,7 +122,7 @@ class MemberRepository @Inject constructor(
         }
     }
 
-    fun getMemberDb(): Flow<List<Member>> {
+    fun getMemberDb(): Flow<List<Member?>?> {
         return memberDao.getAllFlow()
     }
 

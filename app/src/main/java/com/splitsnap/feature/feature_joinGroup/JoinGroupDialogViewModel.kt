@@ -45,7 +45,7 @@ class JoinGroupDialogViewModel @Inject constructor(
 
     fun joinGroup(groupId: String, onSuccess: () -> Unit) {
         viewModelScope.launch (Dispatchers.IO){
-            val member=memberRepository.getMemberDb().first().firstOrNull()
+            val member=memberRepository.getMemberDb().first()?.firstOrNull()
             member?.let {memberFromDB->
                 groupRepository.joinGroup(member = memberFromDB, groupId = groupId).collect { dataState ->
                     _uiState.update { it.copy(showLoader = false) }

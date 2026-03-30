@@ -17,7 +17,6 @@ import kotlinx.serialization.Serializable
 
 const val MEMBER_TABLE="member_table"
 @Keep
-@Parcelize
 @Entity(tableName = MEMBER_TABLE)
 data class Member(
     @PrimaryKey
@@ -28,7 +27,7 @@ data class Member(
     val photoUrl: String?="",               // URL to the user's profile photo
     val createdGroupIds: List<String> = emptyList(),  // List of group IDs the user has created
     val joinedGroupIds: List<String> = emptyList()    // List of group IDs the user has joined
-):Parcelable
+)
 
 fun Member.toMap(): Map<String, Any?> {
     return mapOf(

@@ -11,16 +11,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import com.google.firebase.Timestamp
 import kotlinx.coroutines.flow.Flow
-import kotlinx.parcelize.Parcelize
-import java.util.Date
 
 
 const val EXPENSE_TABLE="expense_table"
 
 @Keep
-@Parcelize
 @Stable
 @Entity(tableName = EXPENSE_TABLE,
     indices = [Index(value = ["groupId"])])
@@ -31,12 +27,12 @@ data class Expense(
     val amount: Double = 0.0,
     val paidBy: Member = Member(),
     val splitAmong: List<Member> = emptyList(),
-    val createdAt: Timestamp = Timestamp(Date()),
-    val updatedAt: Timestamp = Timestamp(Date()),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
     val groupId: String = "",
     val latitude: Double = 0.0,   // Latitude as a Double
     val longitude: Double = 0.0   // Longitude as a Double
-): Parcelable
+)
 
 fun Expense.toMap(): Map<String, Any> {
     return mapOf(

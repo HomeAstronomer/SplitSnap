@@ -36,7 +36,7 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch (Dispatchers.IO){
             _uiState.update { it.copy(isLoading = true) }
             memberRepository.getMemberDb().collect{member->
-                member.getOrNull(0)?.let{ noNullMember ->
+                member?.getOrNull(0)?.let{ noNullMember ->
                     isLoggedIn=memberRepository.getMemberFromFirestore(noNullMember.uid)!=null
                     _uiState.update { it.copy(isLoading = false) }
                 }

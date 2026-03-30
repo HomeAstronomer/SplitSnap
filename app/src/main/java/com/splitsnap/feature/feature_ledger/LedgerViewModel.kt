@@ -72,7 +72,7 @@ class LedgerViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO){
             groupRepository.getExpenseFromGroupId(groupId).combine( memberRepository.getMemberDb()){expenses,member->
-                member.getOrNull(0)?.let {
+                member?.getOrNull(0)?.let {
                     val moneyStatus=calculateMoneyStatus(it, expenses)
                     _uiState.update { it.copy(moneyStatus = moneyStatus) }
                 }
@@ -82,7 +82,7 @@ class LedgerViewModel @Inject constructor(
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
             memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+                memberList?.getOrNull(0)?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
                 }
 

@@ -189,25 +189,6 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                         modifier = Modifier.padding(bottom = 24.dp),
                     )
 
-                    TextField(
-                        value = email,
-                        onValueChange = { email = it },
-                        label = { Text("Email") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-
-                    TextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        label = { Text("Password") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
-
                     OutlinedButton(
                         onClick = {
                             loginViewModel.signIn(email, password) {
@@ -220,7 +201,7 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                         Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Email, // Replace with your icon resource
-                                contentDescription = "Create Group", // Replace with your string resource
+                                contentDescription = "Sign In with Email", // Replace with your string resource
                                 modifier = Modifier.padding(end = 8.dp), tint = Color.Unspecified
                             )
                             Text(

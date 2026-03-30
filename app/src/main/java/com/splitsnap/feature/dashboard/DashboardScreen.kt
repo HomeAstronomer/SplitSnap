@@ -79,6 +79,7 @@ import com.splitsnap.navigation.LedgerRoute
 import com.splitsnap.navigation.LoginScreenRoute
 import com.splitsnap.utils.ifNullOrEmpty
 import com.google.firebase.Timestamp
+import java.lang.System
 import java.util.Date
 
 
@@ -401,7 +402,7 @@ fun DashboardHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Text(text = "Add Member")
+                        Text(text = "Join a Group")
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
@@ -441,8 +442,8 @@ fun DashboardContentPreview() {
                 id = "group1",
                 name = "Weekend Getaway",
                 members = emptyList(),
-                createdAt = Timestamp(Date()),
-                updatedAt = Timestamp(Date()),
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
                 groupImg = "https://example.com/sample-group-img.jpg"
             )
         ), navigateGroup = {}

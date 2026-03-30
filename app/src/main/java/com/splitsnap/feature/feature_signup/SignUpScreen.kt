@@ -219,13 +219,15 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel, navController: NavHostControl
 
 
     LaunchedEffect(key1 = uiState.showToast) {
-        Toast.makeText(
-            context,
-            uiState.toastMessage,
-            Toast.LENGTH_SHORT,
-        ).show()
-        delay(2.seconds)
-        signUpViewModel.resetToast()
+        if(uiState.showToast) {
+            Toast.makeText(
+                context,
+                uiState.toastMessage,
+                Toast.LENGTH_SHORT,
+            ).show()
+            delay(2.seconds)
+            signUpViewModel.resetToast()
+        }
 
     }
 

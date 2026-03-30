@@ -22,6 +22,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.splitsnap.data.local.Group
 import com.splitsnap.atoms.ImageCompose
+import com.splitsnap.utils.TimeUtils.formatDate
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,7 +38,7 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
     ) {
         Row(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -45,7 +46,7 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
             ImageCompose(Modifier
                 .size(96.dp)
                 .background(
-                    MaterialTheme.colorScheme.surfaceContainer,
+                    MaterialTheme.colorScheme.surfaceBright,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .clip(RoundedCornerShape(12.dp))
@@ -63,7 +64,8 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Group Name
                 Text(
                     text = group.name,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -71,23 +73,21 @@ fun GroupCard(group: Group, onClick: () -> Unit) {
                 // Members Count
                 Text(
                     text = "${group.members.size} members",
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Creation Date
                 Text(
-                    text = "Created: ${formatDate(group.createdAt.toDate())}",
+                    text = "Created: ${formatDate(group.createdAt)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
     }
 }
 
-fun formatDate(date: Date): String {
-    val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    return formatter.format(date)
-}
+

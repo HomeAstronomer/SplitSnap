@@ -105,6 +105,7 @@ import com.splitsnap.utils.updateDateFromMillis
 import com.splitsnap.utils.updateTimeFromMillis
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.System
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -403,7 +404,7 @@ fun EditTransactionDetails(
                     amount = amount.toDoubleOrNull() ?: 0.0,
                     splitAmong = splitAmongMap.toMap()
                         .filter { it.value }.keys.toList(),
-                    createdAt = Timestamp(formatToDate(time)),
+                    createdAt =  System.currentTimeMillis(),
                     groupId = clickedGroup.id,
                     latitude = latitude,
                     longitude = longitude

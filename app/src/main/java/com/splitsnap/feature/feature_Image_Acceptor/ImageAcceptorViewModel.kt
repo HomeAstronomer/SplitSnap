@@ -68,7 +68,7 @@ class ImageAcceptorViewModel @Inject constructor(
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
             memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+                memberList?.getOrNull(0)?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
                 }
 

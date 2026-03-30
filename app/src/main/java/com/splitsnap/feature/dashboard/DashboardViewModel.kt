@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.System
 import java.util.Date
 import javax.inject.Inject
 
@@ -53,7 +54,7 @@ class DashboardViewModel @Inject constructor(
     private fun getMembersFromDb() {
         viewModelScope.launch(Dispatchers.IO) {
             memberRepository.getMemberDb().collect { memberList ->
-                memberList.getOrNull(0)?.let { firstMember->
+                memberList?.getOrNull(0)?.let { firstMember->
                     _uiState.update { it.copy(member = firstMember) }
                     getGroupsApiCall()
 
@@ -98,8 +99,8 @@ class DashboardViewModel @Inject constructor(
                     id = getNewGroupId(),
                     name = "The Boys",
                     members = listOf(it),
-                    createdAt = Timestamp(Date()),
-                    updatedAt = Timestamp(Date()),
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis(),
                 )
                 groupRepository.createGroup(group, it.uid).collect { dataState ->
                     _uiState.update { it.copy(showLoader = false) }

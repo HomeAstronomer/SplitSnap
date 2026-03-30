@@ -236,10 +236,9 @@ fun LedgerScreenInternal(
             item { Spacer(modifier = Modifier.height(16.dp)) }
             itemsIndexed(expense) { index, item ->
                 val currentDate = formatDateForSeparator(item.createdAt)
-                val previousDate = if (index > 0) formatDateForSeparator(expense[index - 1].createdAt) else null
 
                 Column {
-                    if (currentDate != previousDate) {
+                    if ((expense.getOrNull(index-1)?.createdAt?:0) != item.createdAt) {
                         DateSeparator(currentDate)
                     }
                     val isMe = remember(item.id, member?.uid) {
@@ -283,21 +282,21 @@ fun DateSeparator(date: String) {
     }
 }
 
-fun formatDateForSeparator(timestamp: Timestamp): String {
-    val date = timestamp.toDate()
+fun formatDateForSeparator(timestamp: Long): String {
     val fmt = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-    val today = fmt.format(Date())
+    val today = fmt.format(Date(timestamp))
+
 
     val cal = Calendar.getInstance()
     cal.add(Calendar.DAY_OF_YEAR, -1)
     val yesterday = fmt.format(cal.time)
 
-    val expenseDate = fmt.format(date)
+    val expenseDate = fmt.format(timestamp)
 
     return when (expenseDate) {
         today -> "Today"
         yesterday -> "Yesterday"
-        else -> SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(date)
+        else -> SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(timestamp)
     }
 }
 
@@ -305,7 +304,7 @@ fun formatDateForSeparator(timestamp: Timestamp): String {
 fun ExpenseCard(expense: Expense, isMe: Boolean, modifier: Modifier = Modifier) {
     // Formatting date
     val dateFormat = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
-    val formattedDate = dateFormat.format(expense.createdAt.toDate())
+    val formattedDate = dateFormat.format(expense.createdAt)
 
     val containerColor = if (isMe) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer
     val contentColor = if (isMe) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -526,4 +525,10 @@ fun LedgerScreenInternalPreview() {
         group = dummyGroup,
         moneyStatus = Pair(50.25, 235435.00)
     )
+
+}
+
+enum class Result(val data: String,val value:Int) {
+    SUCCESS("ok",5),
+    ERROR("fail",6)
 }
