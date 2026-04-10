@@ -189,6 +189,25 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavHostController
                         modifier = Modifier.padding(bottom = 24.dp),
                     )
 
+                    TextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+
+                    TextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("Password") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+
                     OutlinedButton(
                         onClick = {
                             loginViewModel.signIn(email, password) {
